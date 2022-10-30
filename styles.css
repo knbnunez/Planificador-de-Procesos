@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+
+*, *:before, *:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Noto Sans';
+}
+
+#area {
+  align-items: center;
+  border: 3px dashed #aaa;
+  border-radius: 5px;
+  color: #555;
+  display: flex;
+  flex-flow: column nowrap;
+  font-size: 15px;
+  height: 80vh;
+  justify-content: center;
+  max-height: 400px;
+  margin: 30px auto;
+  overflow: auto;
+  padding: 25px;
+  text-align: center;
+  white-space: pre-line;
+  width: 80%;
+  max-width: 600px;
+}
+
+h3 {
+  color: #555;
+  font-weight: 400;
+}
