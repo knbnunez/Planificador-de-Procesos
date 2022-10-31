@@ -8,7 +8,17 @@ function Proceso(id, tArribo, cantRafagas, tRafagaCpu, tRafagaES, prioridad) {
     this.prioridad = prioridad;
     //
     this.tCpuTotal = tRafagaCpu * cantRafagas;
-    this.tESTotal = tRafagaES * cantRafagas;
-    this.tComputoCpu = 0;
-    this.tComputoES = 0;
+    this.tESTotal = tRafagaES * (cantRafagas - 1);
+    //
+    this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
+    this.tComputoParcialES = 0;  // x ejecución de ráfaga.
+    //
+    this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
+    this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
+    //
+    this.fuePausado = False; // solo afecta en prioridad externa y round robin (a los preemptive)
+    //
+    this.tRetorno = 0;
+    this.tEspera = 0;
+
 }
