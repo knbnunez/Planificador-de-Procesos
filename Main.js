@@ -1,26 +1,38 @@
+// Para la lectura de archivos instalé node.js
+// Entiendo que si alguien quiere correr éste mismo programa, deberá descargarse node.js también...
+// ¿Es así?
+
 // REVISAR TEMA LECTURA DE ARCHIVOS
 // Tengo que leer linea x linea quedándome con los subtstrings
 // que esten separados por coma.
 
 
 // BORRAR //
-//
-this.id = id;
-this.tArribo = tArribo;
-this.cantRafagas = cantRafagas;
-this.tRafagaCpu = tRafagaCpu;
-this.tRafagaES = tRafagaES;
-this.prioridad = prioridad;
-//
-this.tCpuTotal = tRafagaCpu * cantRafagas;
-this.tESTotal = tRafagaES * (cantRafagas - 1);
-//
-this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
-this.tComputoParcialES = 0;  // x ejecución de ráfaga.
-//
-this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
-this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
-//
+// Constructor
+function Proceso(id, tArribo, cantRafagas, tRafagaCpu, tRafagaES, prioridad) {
+    this.id = id;
+    this.tArribo = tArribo;
+    this.cantRafagas = cantRafagas;
+    this.tRafagaCpu = tRafagaCpu;
+    this.tRafagaES = tRafagaES;
+    this.prioridad = prioridad;
+    //
+    this.tCpuTotal = tRafagaCpu * cantRafagas;
+    this.tESTotal = tRafagaES * (cantRafagas - 1);
+    //
+    this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
+    this.tComputoParcialES = 0;  // x ejecución de ráfaga.
+    //
+    this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
+    this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
+    //
+    this.fuePausado = False; // solo afecta en prioridad externa y round robin (a los preemptive)
+    //
+    this.tRetorno = 0;
+    this.tEspera = 0;
+
+}
+///
 
 
 /////////////////////////////////////////////
@@ -56,7 +68,7 @@ function pe(procesosMovidos) {
                 colaListos.push(procesoCorriendo);
             } // Sino, sigue esperando en la cola de listos con el resto.
         
-        
+        }
     } else {
         prioridades = [];
         colaListos.forEach(proceso => prioridades.push(proceso.prioridad));
@@ -67,7 +79,7 @@ function pe(procesosMovidos) {
         colaCorriendo.push(procesoACorrer);                                              // Le asigno la cpu
     }
     // Sino, dejo que el proceso que está corriendo siga ejecutando.
-}                
+}               
 
 function rr() {
     if (colaCorriendo.length != 0) {
