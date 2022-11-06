@@ -1,0 +1,58 @@
+[
+	{
+		id: 1,
+		tArribo: 0,
+		cantRafagas: 2,
+		tRafagaCpu: 10,
+		tRafagaES: 20,
+		prioridad: 2
+	},
+	{
+		id: 2,
+		tArribo: 4,
+		cantRafagas: 1,
+		tRafagaCpu: 20,
+		tRafagaES: 30,
+		prioridad: 3
+	},
+	{
+		id: 3,
+		tArribo: 8,
+		cantRafagas: 3,
+		tRafagaCpu: 5,
+		tRafagaES: 15,
+		prioridad: 5
+	},
+	{
+		id: 4,
+		tArribo: 10,
+		cantRafagas: 1,
+		tRafagaCpu: 15,
+		tRafagaES: 30,
+		prioridad: 100
+	},
+	{
+		id: 5,
+		tArribo: 2,
+		cantRafagas: 2,
+		tRafagaCpu: 3,
+		tRafagaES: 5,
+		prioridad: 80
+	},
+	{
+		id: 6,
+		tArribo: 3,
+		cantRafagas: 4,
+		tRafagaCpu: 6,
+		tRafagaES: 4,
+		prioridad: 1
+	},
+	{
+		id: 7,
+		tArribo: 0,
+		cantRafagas: 1,
+		tRafagaCpu: 10,
+		tRafagaES: 6,
+		prioridad: 50
+	}
+]

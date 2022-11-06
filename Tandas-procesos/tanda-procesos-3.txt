@@ -1,0 +1,34 @@
+[
+	{
+		id: 1,
+		tArribo: 3,
+		cantRafagas: 1,
+		tRafagaCpu: 5,
+		tRafagaES: 30,
+		prioridad: 50
+	},
+	{
+		id: 2,
+		tArribo: 2,
+		cantRafagas: 1,
+		tRafagaCpu: 8,
+		tRafagaES: 20,
+		prioridad: 48
+	},
+	{
+		id: 3,
+		tArribo: 1,
+		cantRafagas: 1,
+		tRafagaCpu: 10,
+		tRafagaES: 10,
+		prioridad: 45
+	},
+	{
+		id: 4,
+		tArribo: 0,
+		cantRafagas: 1,
+		tRafagaCpu: 6,
+		tRafagaES: 14,
+		prioridad: 100
+	}
+]
