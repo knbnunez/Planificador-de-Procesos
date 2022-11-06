@@ -1,37 +1,36 @@
-// Para la lectura de archivos instalé node.js
-// Entiendo que si alguien quiere correr éste mismo programa, deberá descargarse node.js también...
-// ¿Es así?
 
-// REVISAR TEMA LECTURA DE ARCHIVOS
-// Tengo que leer linea x linea quedándome con los subtstrings
-// que esten separados por coma.
+class Proceso {
+    
+    constructor () {
+    // vacío
+    }
 
-
-// BORRAR //
-// Constructor
-function Proceso(id, tArribo, cantRafagas, tRafagaCpu, tRafagaES, prioridad) {
-    this.id = id;
-    this.tArribo = tArribo;
-    this.cantRafagas = cantRafagas;
-    this.tRafagaCpu = tRafagaCpu;
-    this.tRafagaES = tRafagaES;
-    this.prioridad = prioridad;
-    //
-    this.tCpuTotal = tRafagaCpu * cantRafagas;
-    this.tESTotal = tRafagaES * (cantRafagas - 1);
-    //
-    this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
-    this.tComputoParcialES = 0;  // x ejecución de ráfaga.
-    //
-    this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
-    this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
-    //
-    this.fuePausado = False; // solo afecta en prioridad externa y round robin (a los preemptive)
-    //
-    this.tRetorno = 0;
-    this.tEspera = 0;
-
+    constructor (id, tArribo, cantRafagas, tRafagaCpu, tRafagaES, prioridad) {
+        this.id = id;
+        this.tArribo = tArribo;
+        this.cantRafagas = cantRafagas;
+        this.tRafagaCpu = tRafagaCpu;
+        this.tRafagaES = tRafagaES;
+        this.prioridad = prioridad;
+        //
+        this.tCpuTotal = tRafagaCpu * cantRafagas;
+        this.tESTotal = tRafagaES * (cantRafagas - 1);
+        //
+        this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
+        this.tComputoParcialES = 0;  // x ejecución de ráfaga.
+        //
+        this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
+        this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
+        //
+        this.fuePausado = False; // solo afecta en prioridad externa y round robin (a los preemptive)
+        //
+        this.tRetorno = 0;
+        this.tEspera = 0;
+    }
 }
+
+// let p = new Proceso();
+// p.id = 
 ///
 
 
@@ -246,6 +245,54 @@ function terminarCiclo() {
     tiempo += 1;
 }
 
+/////////////////////////////////////////////////////////////////////////
+function parseCSV(text) {
+    // Obtenemos las lineas del texto
+    let lines = text.replace(/\r/g, '').split('\n');
+    return lines.map(line => {
+        // Por cada linea obtenemos los valores
+        let values = line.split(',');
+        return values;
+    });
+}
+  
+function reverseMatrix(matrix){
+    let output = [];
+    // Por cada fila
+    matrix.forEach((values, row) => {
+        // Vemos los valores y su posicion
+        values.forEach((value, col) => {
+            // Si la posición aún no fue creada
+            if (output[col] === undefined) output[col] = [];
+            output[col][row] = value;
+        });
+    });
+    return output;
+}
+  
+function readFile(evt) {
+    let file = evt.target.files[0];
+    let reader = new FileReader();
+    reader.onload = (e) => {
+        // Cuando el archivo se terminó de cargar
+        let lines = parseCSV(e.target.result);
+        let output = reverseMatrix(lines);
+        console.log(output);
+    };
+    // Leemos el contenido del archivo seleccionado
+    reader.readAsBinaryString(file);
+}
+
+function main() {
+    console.log('dentro de main');
+    // readFile(evt);
+    while (colaTerminados != cantProcesos) {
+        let procesosMovidos = moverProcesosAColaListos();
+        asignarCpu(planificacion, procesosMovidos);
+        terminarCiclo();
+    }
+}
+
 
 // MAIN
 var cantProcesos = 0;
@@ -271,10 +318,15 @@ var tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
 //
 var quantum = 0;
 
-// inicializarProcesos(cola_nuevos): Creo e inicializo los procesos por cada línea del archivo txt
+// No permite hacer esta acción porque dice que puede ser null.
+document.getElementById('file').addEventListener('change', (evt) => {
+    console.log('Estoy dentro del event listener');
+    readFile(evt);
+    main();
+}, false);
 
-while (colaTerminados != cantProcesos) {
-    let procesosMovidos = moverProcesosAColaListos();
-    asignarCpu(planificacion, procesosMovidos);
-    terminarCiclo();
-}
+// let inputFile = document.getElementById('file');
+// if (inputFile) {                                      // No entra acá.
+//     console.log('Estoy dentro del event listener');
+//     inputFile.addEventListener('change', readFile, false);
+// }
