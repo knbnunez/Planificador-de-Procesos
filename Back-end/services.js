@@ -1,40 +1,6 @@
 const fs = require('fs');
 const Proceso = require('./models');
 
-const tratarArchivo = (archivo) => {
-	console.log('= Trabajando sobre el archivo =');
-	const guardadoEn = archivo.filepath;
-	console.log(guardadoEn);
-	
-	// En files recibi el archivo y se guardo temporlmente en 
-	fs.readFile(guardadoEn, (err, data) => {
-		if (err) throw err;
-	
-		const contenidoDelArchivoString = data.toString()
-		var listaDeProces = eval('(' + contenidoDelArchivoString + ')')
-		// console.log(listaDeProces);
-        const objetos = [];
-		listaDeProces.forEach(p => {
-            const objAux = new Proceso(
-                p.id, 
-                p.tArribo, 
-                p.cantRafagas, 
-                p.tRafagaCpu, 
-                p.tRafagaES,
-                p.prioridad
-            );
-
-            console.log(objAux);
-		});
-
-
-		// Aca hace el tp
-	})
-}
-
-module.exports = tratarArchivo;
-
-
 function fcfs() {
     if (colaCorriendo.length != 0 && colaCorriendo[0].tComputoParcialCpu == tRafagaCpu) {
         desasignarCpu();
@@ -157,8 +123,6 @@ function srt(procesosMovidos) {
     }
 }
 
-
-
 ///////////////////////////////////////////////
 
 // Filtra los procesos nuevos y bloqueados que están listos para ser movidos a la cola de listos,
@@ -245,47 +209,10 @@ function terminarCiclo() {
     tiempo += 1;
 }
 
-/////////////////////////////////////////////////////////////////////////
-// function parseCSV(text) {
-//     // Obtenemos las lineas del texto
-//     let lines = text.replace(/\r/g, '').split('\n');
-//     return lines.map(line => {
-//         // Por cada linea obtenemos los valores
-//         let values = line.split(',');
-//         return values;
-//     });
-// }
-  
-// function reverseMatrix(matrix){
-//     let output = [];
-//     // Por cada fila
-//     matrix.forEach((values, row) => {
-//         // Vemos los valores y su posicion
-//         values.forEach((value, col) => {
-//             // Si la posición aún no fue creada
-//             if (output[col] === undefined) output[col] = [];
-//             output[col][row] = value;
-//         });
-//     });
-//     return output;
-// }
-  
-// function readFile(evt) {
-//     let file = evt.target.files[0];
-//     let reader = new FileReader();
-//     reader.onload = (e) => {
-//         // Cuando el archivo se terminó de cargar
-//         let lines = parseCSV(e.target.result);
-//         let output = reverseMatrix(lines);
-//         console.log(output);
-//     };
-//     // Leemos el contenido del archivo seleccionado
-//     reader.readAsBinaryString(file);
-// }
+////////////////////////////////////////////////////////////////////////
 
 function main() {
     console.log('dentro de main');
-    // readFile(evt);
     while (colaTerminados != cantProcesos) {
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
@@ -316,4 +243,53 @@ var tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
 var tUsoSo = 0;         // Computo de TIP, TCP y TFP
 var tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
 //
-var quantum = 0;
+var quantum = 0;        // Lo ingresa el usuario
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const tratarArchivo = (archivo) => {
+	console.log('= Trabajando sobre el archivo =');
+	const guardadoEn = archivo.filepath;
+	console.log(guardadoEn);
+	
+	// En files recibi el archivo y se guardo temporlmente en 
+	fs.readFile(guardadoEn, (err, data) => {
+		if (err) throw err;
+	
+		const contenidoDelArchivoString = data.toString()
+		var listaProcesos = eval('(' + contenidoDelArchivoString + ')')
+		// console.log(listaDeProces);
+        const objetos = [];
+		listaProcesos.forEach(p => {
+            const objAux = new Proceso(
+                p.id, 
+                p.tArribo, 
+                p.cantRafagas, 
+                p.tRafagaCpu, 
+                p.tRafagaES,
+                p.prioridad
+            );
+            
+            console.log(objAux);
+            
+		});
+
+
+		// Aca hace el tp
+	})
+}
+
+module.exports = tratarArchivo;
