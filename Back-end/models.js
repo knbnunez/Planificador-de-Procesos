@@ -1,9 +1,4 @@
 class Proceso {
-    
-    // constructor () {
-    // // vacío
-    // }
-
     constructor (id, tArribo, cantRafagas, tRafagaCpu, tRafagaES, prioridad) {
         this.id = id;
         this.tArribo = tArribo;

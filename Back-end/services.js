@@ -1,6 +1,34 @@
+// IMPORTS
 const fs = require('fs');
 const Proceso = require('./models');
 
+
+// Definición de variables a usar
+let cantProcesos = 0;
+//
+let colaNuevos = [];
+let colaListos = [];
+let colaCorriendo = [];
+let colaBloqueados = [];
+let colaTerminados = [];
+//
+let tiempo = 0;
+//
+let tip = 0;            // Tiempo de Inicio de Proceso (TIP) + Lo ingresa el usuario
+let tcp = 0;            // Tiempo de Conmutación entre Procesos (TCP) + Lo ingresa el usuario
+let tfp = 0;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
+let tComputoTip = 0;
+let tComputoTcp = 0;
+let tComputoTfp = 0;
+//
+let tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
+let tUsoSo = 0;         // Computo de TIP, TCP y TFP
+let tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
+//
+let quantum = 0;        // Lo ingresa el usuario
+
+
+// Funciones de planificación
 function fcfs() {
     if (colaCorriendo.length != 0 && colaCorriendo[0].tComputoParcialCpu == tRafagaCpu) {
         desasignarCpu();
@@ -123,7 +151,7 @@ function srt(procesosMovidos) {
     }
 }
 
-///////////////////////////////////////////////
+// Funciones comúnes
 
 // Filtra los procesos nuevos y bloqueados que están listos para ser movidos a la cola de listos,
 // si exisiteron procesos listos para mover, se mueven a la cola de listos.
@@ -131,7 +159,8 @@ function moverProcesosAColaListos() {
     let nuevosAMover = colaNuevos.filter(proceso => proceso.tArribo == tiempo);
     let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoES == proceso.tRafagaES);    
     
-    let procesosAMover = nuevosAMover.forEach(proceso => procesosAMover.push(proceso)); // Debería resetearse con cada llamada a la function
+    let procesosAMover = [];
+    nuevosAMover.forEach(proceso => procesosAMover.push(proceso)); // Debería resetearse con cada llamada a la function
     procesosAMover = bloqueadosAMover.forEach(proceso => procesosAMover.push(proceso));
     
     colaListos = colaListos.concat(procesosAMover);
@@ -185,8 +214,11 @@ function desasignarCpu() {
 // REVISAR //
 // Seguramente me falte sumar más tiempos, y calcular más cosas...
 function terminarCiclo() {
+    // Mejor (...length == 1)
     if (colaCorriendo.length != 0) { // Hay proceso haciendo uso de cpu? 
         // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
+        console.log("dentro de terminar ciclo");
+        console.log(colaCorriendo[0]);
         if (colaCorriendo[0].tComputoTotalCpu == 0 && tComputoTip != tip) {          // aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
             tComputoTip += 1;
             tCpuDesocupada += 1;
@@ -213,66 +245,32 @@ function terminarCiclo() {
 
 function main() {
     console.log('dentro de main');
-    while (colaTerminados != cantProcesos) {
+    const planificacion = 1; // Hardcodeado
+    while (colaTerminados.length < cantProcesos) {
+        console.log("Ejectua el while main: "+tiempo);
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
+        console.log("Asignó procesos a cpu");
         terminarCiclo();
     }
+    console.log("Tiempo de uso de CPU: "+tUsoCpu);
 }
 
 
-// MAIN
-var cantProcesos = 0;
-//
-var colaNuevos = [];
-var colaListos = [];
-var colaCorriendo = [];
-var colaBloqueados = [];
-var colaTerminados = [];
-//
-var tiempo = 0;
-//
-var tip = 0; // Tiempo de Inicio de Proceso (TIP)
-var tcp = 0; // Tiempo de Conmutación entre Procesos (TCP)
-var tfp = 0; // Tiempo de Finalización de Proceso (TFP)
-var tComputoTip = 0;
-var tComputoTcp = 0;
-var tComputoTfp = 0;
-//
-var tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
-var tUsoSo = 0;         // Computo de TIP, TCP y TFP
-var tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
-//
-var quantum = 0;        // Lo ingresa el usuario
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Si se me complica mucho, volver a la idea de hacer todo en el lado del cliente
 
 const tratarArchivo = (archivo) => {
-	console.log('= Trabajando sobre el archivo =');
+	// console.log('= Trabajando sobre el archivo =');
 	const guardadoEn = archivo.filepath;
-	console.log(guardadoEn);
-	
+	// console.log(guardadoEn);
 	// En files recibi el archivo y se guardo temporlmente en 
-	fs.readFile(guardadoEn, (err, data) => {
+	fs.readFile(guardadoEn, (err, contenido) => {
 		if (err) throw err;
 	
-		const contenidoDelArchivoString = data.toString()
+		const contenidoDelArchivoString = contenido.toString()
 		var listaProcesos = eval('(' + contenidoDelArchivoString + ')')
 		// console.log(listaDeProces);
-        const objetos = [];
 		listaProcesos.forEach(p => {
             const objAux = new Proceso(
                 p.id, 
@@ -282,14 +280,17 @@ const tratarArchivo = (archivo) => {
                 p.tRafagaES,
                 p.prioridad
             );
-            
             console.log(objAux);
-            
+            colaNuevos.push(objAux);
+            cantProcesos += 1;
 		});
-
-
-		// Aca hace el tp
 	})
+    console.log({
+        msg: "antes del main",
+        colaNuevos,
+        cantProcesos
+    });
+    main();
 }
 
 module.exports = tratarArchivo;
