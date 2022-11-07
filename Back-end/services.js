@@ -30,8 +30,10 @@ let quantum = 0;        // Lo ingresa el usuario
 
 // Funciones de planificación
 function fcfs() {
+    console.log('Dentro de FCFS');
     // Puedo permiterme hacer esto en lugar de encadenar if's porque comparo con AND, entonces si en el recorrido de la condición encuentra que una no se cumple sale de inmediato (corto circuito)
-    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) {
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) {
+        console.log("Se entró en el 1° if de fcfs");
         desasignarCpu();
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
@@ -43,6 +45,7 @@ function fcfs() {
 }
 
 function pe(procesosMovidos) {
+    console.log('Dentro de PE');
     let prioridades = [];
 
     if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) { // Si no hubo nuevos arribos a la cola de listos, no me interesa cambiar, por lo tanto seguiré de largo.
@@ -75,6 +78,8 @@ function pe(procesosMovidos) {
 }               
 
 function rr() {
+    console.log('Dentro de RR');
+
     if (colaCorriendo.length > 0) {
         if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum < colaCorriendo[0].tRafagaCpu) { // Todavía no completó la ráfaga pero se le agotó el quantum
             let procesoADesasignar = colaCorriendo.pop();
@@ -98,6 +103,8 @@ function rr() {
 
 // Comparamos las duraciones de ráfagas para qudarnos con la más corta y asignar el proceso correspondiente a la cpu
 function spn() {
+    console.log('Dentro de SPN');
+
     if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) {
         desasignarCpu();
         let duracionRafagas = [];
@@ -118,6 +125,7 @@ function spn() {
 }
 
 function srt(procesosMovidos) {
+    console.log('Dentro de SRT');
     let duracionRafagas = [];
 
     if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) {
@@ -153,6 +161,8 @@ function srt(procesosMovidos) {
 // Filtra los procesos nuevos y bloqueados que están listos para ser movidos a la cola de listos,
 // si exisiteron procesos listos para mover, se mueven a la cola de listos.
 function moverProcesosAColaListos() {
+    console.log('Dentro de moviendo a cola listos');
+
     let nuevosAMover = colaNuevos.filter(proceso => proceso.tArribo == tiempo);
     let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoES == proceso.tRafagaES);    
     
@@ -166,6 +176,7 @@ function moverProcesosAColaListos() {
 }
 
 function asignarCpu(planificacion, procesosMovidos) {
+    console.log('Dentro de asignar CPU');
     switch (planificacion) {
         case 1: //FCFS (First Come First Served)
             fcfs();
@@ -187,6 +198,8 @@ function asignarCpu(planificacion, procesosMovidos) {
 
 // Desasigna Cpu y decide si enviarlo a la cola de bloqueados, sino será enviado a la cola de terminados luego de unos ciclos
 function desasignarCpu() {
+    console.log('Dentro de Desasignar cpu');
+
     if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) {
         let procesoADesasignar = colaCorriendo.pop();
         procesoADesasignar.tComputoTotalCpu += procesoADesasignar.tComputoParcialCpu;
@@ -209,12 +222,18 @@ function desasignarCpu() {
 // REVISAR //
 // Seguramente me falte sumar más tiempos, y calcular más cosas...
 function terminarCiclo() {
+    console.log('Dentro de terminar ciclo');
+
     // Mejor (...length == 1)
-    if (colaCorriendo.length > 0) { // Hay proceso haciendo uso de cpu? 
+    console.log(colaCorriendo[0]);
+    // Hay proceso haciendo uso de cpu? 
+    if (colaCorriendo.length > 0) { 
         // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
-        console.log("dentro de terminar ciclo");
-        console.log(colaCorriendo[0]);
-        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip != tip)) {          // aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
+        // console.log("dentro de terminar ciclo");
+        console.log(colaCorriendo[0].tComputoTotalCpu);
+        // Aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
+        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip != tip)) {          
+            console.log("Entré al if");
             tComputoTip += 1;
             tCpuDesocupada += 1;
             tUsoSo += 1;
@@ -230,6 +249,7 @@ function terminarCiclo() {
             tUsoCpu += 1;
         }
     } else {
+        console.log("O entra acá?");
         tCpuDesocupada += 1;
     }
 
@@ -247,43 +267,41 @@ function main() {
         asignarCpu(planificacion, procesosMovidos);
         console.log("Asignó procesos a cpu");
         terminarCiclo();
+        console.log("");
+        console.log("-----------------------");
+        console.log("");
     }
     console.log("Tiempo de uso de CPU: "+tUsoCpu);
 }
 
 
+// Desencadenador
 
-// Si se me complica mucho, volver a la idea de hacer todo en el lado del cliente
-
-const tratarArchivo = (archivo) => {
-	// console.log('= Trabajando sobre el archivo =');
+function tratarArchivo(archivo) {
 	const guardadoEn = archivo.filepath;
-	// console.log(guardadoEn);
-	// En files recibi el archivo y se guardo temporlmente en 
-	fs.readFile(guardadoEn, (err, contenido) => {
-		if (err) throw err;
-	
-		const contenidoDelArchivoString = contenido.toString()
-		var listaProcesos = eval('(' + contenidoDelArchivoString + ')')
-		// console.log(listaDeProces);
-		listaProcesos.forEach(p => {
-            const objAux = new Proceso(
-                p.id, 
-                p.tArribo, 
-                p.cantRafagas, 
-                p.tRafagaCpu, 
-                p.tRafagaES,
-                p.prioridad
-            );
-            console.log(objAux);
-            colaNuevos.push(objAux);
-            cantProcesos += 1;
-		});
-	})
+	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
+    const contenidoDelArchivoString = contenidoDelArchivo.toString()
+    var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
+    // console.log(listaDeProcesos);
+    listaProcesos.forEach(p => {
+        const objAux = new Proceso(
+            p.id, 
+            p.tArribo, 
+            p.cantRafagas, 
+            p.tRafagaCpu, 
+            p.tRafagaES,
+            p.prioridad
+        );
+        // console.log(objAux);
+        colaNuevos.push(objAux);
+        cantProcesos += 1;
+    });
+    
     console.log({
         msg: "antes del main",
         colaNuevos,
-        cantProcesos
+        cantProcesos, 
+        // listaProcesos
     });
     main();
 }
