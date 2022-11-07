@@ -30,12 +30,13 @@ let quantum = 0;        // Lo ingresa el usuario
 
 // Funciones de planificación
 function fcfs() {
-    if (colaCorriendo.length != 0 && colaCorriendo[0].tComputoParcialCpu == tRafagaCpu) {
+    // Puedo permiterme hacer esto en lugar de encadenar if's porque comparo con AND, entonces si en el recorrido de la condición encuentra que una no se cumple sale de inmediato (corto circuito)
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) {
         desasignarCpu();
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
     
-    } else if (colaCorriendo.length == 0) {
+    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
     } // Sino sigo esperando que finalice el proceso
@@ -43,26 +44,25 @@ function fcfs() {
 
 function pe(procesosMovidos) {
     let prioridades = [];
-    if (colaCorriendo.length != 0) {
-        if (procesosMovidos.length != 0) {  // Si no hubo nuevos arribos a la cola de listos, no me interesa cambiar, por lo tanto seguiré de largo.
-            
-            procesosMovidos.forEach(proceso => prioridades.push(proceso.prioridad));
-            let masAlta = Math.min.apply(null, prioridades);
-            
-            if (colaCorriendo[0].prioridad > masAlta) { // Si el proceso que está corriendo tiene un valor más alto, es porque tienen prioridad más baja.
-                procesoACorrer = colaListos.filter(proceso => proceso.prioridad == masAlta);
-                let idx = colaListos.indexOf(procesoACorrer);
-                let procesoACorrer = colaListos.splice(idx, idx+1);
-            
-                let procesoCorriendo = colaCorriendo.pop();
-                procesoCorriendo.fuePausado = true;
-            
-                colaCorriendo.push(procesoACorrer);
-                colaListos.push(procesoCorriendo);
-            } // Sino, sigue esperando en la cola de listos con el resto.
+
+    if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) { // Si no hubo nuevos arribos a la cola de listos, no me interesa cambiar, por lo tanto seguiré de largo.
         
-        }
-    } else {
+        procesosMovidos.forEach(proceso => prioridades.push(proceso.prioridad));
+        let masAlta = Math.min.apply(null, prioridades);
+        
+        if (colaCorriendo[0].prioridad > masAlta) { // Si el proceso que está corriendo tiene un valor más alto, es porque tienen prioridad más baja.
+            procesoACorrer = colaListos.filter(proceso => proceso.prioridad == masAlta);
+            let idx = colaListos.indexOf(procesoACorrer);
+            let procesoACorrer = colaListos.splice(idx, idx+1);
+        
+            let procesoCorriendo = colaCorriendo.pop();
+            procesoCorriendo.fuePausado = true;
+        
+            colaCorriendo.push(procesoACorrer);
+            colaListos.push(procesoCorriendo);
+        } // Sino, sigue esperando en la cola de listos con el resto.
+        
+    } else if (colaListos.length > 0) {
         prioridades = [];
         colaListos.forEach(proceso => prioridades.push(proceso.prioridad));
         let masAlta = Math.min.apply(null, prioridades);
@@ -75,21 +75,22 @@ function pe(procesosMovidos) {
 }               
 
 function rr() {
-    if (colaCorriendo.length != 0) {
-        if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum == colaCorriendo[0].tRafagaCpu) { // Caso completó rafaga dentro del tiempo del quantum
-            desasignarCpu();
-            let procesoACorrer = colaListos.shift();
-            colaCorriendo.push(procesoACorrer);
-
-        } else if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum != colaCorriendo[0].tRafagaCpu) { // Caso no completó ráfaga y se agotó el quantum, debe ser "pausado"
+    if (colaCorriendo.length > 0) {
+        if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum < colaCorriendo[0].tRafagaCpu) { // Todavía no completó la ráfaga pero se le agotó el quantum
             let procesoADesasignar = colaCorriendo.pop();
             procesoADesasignar.fuePausado = true;
             colaListos.push(procesoADesasignar);
 
+            // Desasigno proceso en Cpu, pero lo ingreso a cola de listos, todavía le falta terminar su rafaga de Cpu
             let procesoACorrer = colaListos.shift();
             colaCorriendo.push(procesoACorrer);
         }
-    } else {
+        else if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum == colaCorriendo[0].tRafagaCpu) { // Caso completó rafaga dentro del tiempo del quantum
+            desasignarCpu();
+            let procesoACorrer = colaListos.shift();
+            colaCorriendo.push(procesoACorrer);
+        } 
+    } else if (colaListos.length > 0) {
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
     }
@@ -97,7 +98,7 @@ function rr() {
 
 // Comparamos las duraciones de ráfagas para qudarnos con la más corta y asignar el proceso correspondiente a la cpu
 function spn() {
-    if (colaCorriendo.length != 0 && colaCorriendo[0].tComputoParcialCpu == tRafagaCpu) {
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) {
         desasignarCpu();
         let duracionRafagas = [];
         colaListos.forEach(p => duracionRafagas.push(p.tRafagaCpu));
@@ -106,7 +107,7 @@ function spn() {
         let procesoACorrer = colaListos.splice(idx, idx+1);
         colaCorriendo.push(procesoACorrer);
     
-    } else if (colaCorriendo.length == 0) {
+    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
         let duracionRafagas = [];
         colaListos.forEach(p => duracionRafagas.push(p.tRafagaCpu));
         let masCorto = Math.min.apply(null, duracionRafagas);
@@ -118,36 +119,32 @@ function spn() {
 
 function srt(procesosMovidos) {
     let duracionRafagas = [];
-    if (procesosMovidos.length != 0) { // Si no hubo nuevos arribos a la cola de listos, no me interesa cambiar, por lo tanto seguiré de largo.
-        if (colaCorriendo.length != 0) {
-            
-            if (colaCorriendo[0].tComputoParcialCpu != tRafagaCpu) {
-                procesosMovidos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
-                let masCorta = Math.min.apply(null, duracionRafagas);
-                
-                if ((colaCorriendo[0].tRafagaCpu - colaCorriendo[0].tComputoParcialCpu) > masCorta) {
-                    procesoACorrer = colaListos.filter(proceso => proceso.tRafagaCpu == masCorta);
-                    let idx = colaListos.indexOf(procesoACorrer);
-                    let procesoACorrer = colaListos.splice(idx, idx+1);
 
-                    let procesoCorriendo = colaCorriendo.pop();
-                    // guardar el tiempo de ráfaga en el que estaba para saber cuánto le falta por consumir la próxima vez que entre
-                    // al desasignarCpu(), puedo consultar Si: computoRafaga == rafagaCpu => computoRafaga = 0; Sino: no reseteo computoRafaga
-                    colaCorriendo.push(procesoACorrer);
-                    colaListos.push(procesoCorriendo);
-                }
-
-            } else desasignarCpu();
-
-        } else { // No hay procesos corriendo. Elijo el de duración de ráfga más corta para que continúe.
-            duracionRafagas = [];
-            colaListos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
+    if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) {
+        if (colaCorriendo[0].tComputoParcialCpu < tRafagaCpu) {
+            procesosMovidos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
             let masCorta = Math.min.apply(null, duracionRafagas);
-            let procesoACorrer = colaListos.filter(proceso => proceso.tRafagaCpu == masCorta);
-            let idx = colaListos.indexOf(procesoACorrer);
-            procesoACorrer = colaListos.splice(idx, idx+1);
-            colaCorriendo.push(procesoACorrer);
-        }
+            
+            if ((colaCorriendo[0].tRafagaCpu - colaCorriendo[0].tComputoParcialCpu) > masCorta) {
+                procesoACorrer = colaListos.filter(proceso => proceso.tRafagaCpu == masCorta);
+                let idx = colaListos.indexOf(procesoACorrer);
+                let procesoACorrer = colaListos.splice(idx, idx+1);
+
+                // Desasigno Cpu, pero entra en cola de listos, por lo que volverá a ejectuar.
+                let procesoCorriendo = colaCorriendo.pop();
+                colaCorriendo.push(procesoACorrer);
+                colaListos.push(procesoCorriendo);
+            }
+        } else desasignarCpu(); // Bloquea el proceso si todavía le faltan rafagas por ejecutar
+    
+    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // No hay procesos corriendo y hay procesos en cola. Elijo el de duración de ráfga más corta para que continúe.
+        duracionRafagas = [];
+        colaListos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
+        let masCorta = Math.min.apply(null, duracionRafagas);
+        let procesoACorrer = colaListos.filter(proceso => proceso.tRafagaCpu == masCorta);
+        let idx = colaListos.indexOf(procesoACorrer);
+        procesoACorrer = colaListos.splice(idx, idx+1);
+        colaCorriendo.push(procesoACorrer);
     }
 }
 
@@ -160,8 +157,8 @@ function moverProcesosAColaListos() {
     let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoES == proceso.tRafagaES);    
     
     let procesosAMover = [];
-    nuevosAMover.forEach(proceso => procesosAMover.push(proceso)); // Debería resetearse con cada llamada a la function
-    procesosAMover = bloqueadosAMover.forEach(proceso => procesosAMover.push(proceso));
+    nuevosAMover.forEach(proceso => procesosAMover.push(proceso));
+    bloqueadosAMover.forEach(proceso => procesosAMover.push(proceso));
     
     colaListos = colaListos.concat(procesosAMover);
     
@@ -190,15 +187,13 @@ function asignarCpu(planificacion, procesosMovidos) {
 
 // Desasigna Cpu y decide si enviarlo a la cola de bloqueados, sino será enviado a la cola de terminados luego de unos ciclos
 function desasignarCpu() {
-    if (colaCorriendo[0].tComputoTotalES != colaCorriendo[0].tESTotal) {
+    if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) {
         let procesoADesasignar = colaCorriendo.pop();
-
         procesoADesasignar.tComputoTotalCpu += procesoADesasignar.tComputoParcialCpu;
         procesoADesasignar.tComputoParcialCpu = 0;
-        
         colaBloqueados.push(procesoADesasignar);
     } else {
-        if (tComputoTfp != tfp) { // aplicar TFP
+        if (tComputoTfp < tfp) { // aplicar TFP
             tComputoTfp += 1;  
         } else {
             tComputoTfp = 0;
@@ -215,15 +210,15 @@ function desasignarCpu() {
 // Seguramente me falte sumar más tiempos, y calcular más cosas...
 function terminarCiclo() {
     // Mejor (...length == 1)
-    if (colaCorriendo.length != 0) { // Hay proceso haciendo uso de cpu? 
+    if (colaCorriendo.length > 0) { // Hay proceso haciendo uso de cpu? 
         // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
         console.log("dentro de terminar ciclo");
         console.log(colaCorriendo[0]);
-        if (colaCorriendo[0].tComputoTotalCpu == 0 && tComputoTip != tip) {          // aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
+        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip != tip)) {          // aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
             tComputoTip += 1;
             tCpuDesocupada += 1;
             tUsoSo += 1;
-       } else if ((colaCorriendo[0].tComputoParcialCpu == 0 && tComputoTcp != tcp) || (colaCorriendo[0].fuePausado == true && tComputoTcp != tcp)) {
+       } else if (((colaCorriendo[0].tComputoParcialCpu == 0) && (tComputoTcp < tcp)) || ((colaCorriendo[0].fuePausado == true) && (tComputoTcp < tcp))) {
             tComputoTcp += 1;
             tCpuDesocupada += 1;
             tUsoSo += 1;
