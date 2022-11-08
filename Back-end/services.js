@@ -34,26 +34,38 @@ function fcfs() {
     console.log('Dentro de FCFS');
     //
     // Puedo permiterme hacer esto en lugar de encadenar if's porque comparo con AND, entonces si en el recorrido de la condición encuentra que una no se cumple sale de inmediato (corto circuito)
-    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) {
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) { // Caso se completó la ráfaga de Cpu
+        //
         console.log("Se entró en el 1° if de fcfs");
+        // if (colaCorriendo === undefined) return;
+        console.log({
+            msg: "Contenido de colaListos",
+            colaListos
+        });
+        //
         desasignarCpu();
-        let procesoACorrer = colaListos.shift();
-        colaCorriendo.push(procesoACorrer);
-        
-        // console.log({
-        //     msg: "Asignando proceso a Cpu",
-        //     colaCorriendo
-        // });
+        if (colaListos.length > 0) {
+            let procesoACorrer = colaListos.shift();
+            colaCorriendo.push(procesoACorrer);
+        }
         //
-        if(colaCorriendo.length>0)console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0].id);
+        console.log({
+            msg: "Proceso shifteado de la colaListos",
+            procesoACorrer,
+            msg:"Proceso pusheado a la colaCorriendo",
+            colaCorriendo
+        });
         //
-    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
+        console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0]?.id);
+        //
+    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // Caso Cpu libre y hay procesos en cola de listos
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
         //
         console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0].id);
         //
-    } // Sino sigo esperando que finalice el proceso
+    }
+    // Sino será tiempo de Cpu desperdiciado
 }
 
 function pe(procesosMovidos) {
@@ -77,7 +89,7 @@ function pe(procesosMovidos) {
             colaListos.push(procesoCorriendo);
         } // Sino, sigue esperando en la cola de listos con el resto.
         
-    } else if (colaListos.length > 0) {
+    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
         prioridades = [];
         colaListos.forEach(proceso => prioridades.push(proceso.prioridad));
         let masAlta = Math.min.apply(null, prioridades);
@@ -86,47 +98,44 @@ function pe(procesosMovidos) {
         procesoACorrer = colaListos.splice(idx, idx+1);                                  // Lo popeo de la cola
         colaCorriendo.push(procesoACorrer);                                              // Le asigno la cpu
     }
-    // Sino, dejo que el proceso que está corriendo siga ejecutando.
+    // Sino, dejo que el proceso que está corriendo siga ejecutando o en caso de no haber ninguno, será Cpu desperdiaciada
 }               
 
 function rr() {
     console.log('Dentro de RR');
 
     if (colaCorriendo.length > 0) {
-        if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum < colaCorriendo[0].tRafagaCpu) { // Todavía no completó la ráfaga pero se le agotó el quantum
+        if ((colaCorriendo[0].tComputoParcialQuantum == quantum) && (colaCorriendo[0].tComputoParcialQuantum < colaCorriendo[0].tRafagaCpu)) { // Todavía no completó la ráfaga pero se le agotó el quantum
             let procesoADesasignar = colaCorriendo.pop();
             procesoADesasignar.fuePausado = true;
             colaListos.push(procesoADesasignar);
 
             // Desasigno proceso en Cpu, pero lo ingreso a cola de listos, todavía le falta terminar su rafaga de Cpu
-            let procesoACorrer = colaListos.shift();
+            let procesoACorrer = colaListos.shift(); // Si no había otros procesos esperando, volverá a entrar a Cpu el mismo proceso que estaba corriendo recién. Será un push cola listos y pop cola listos del mismo elemento
             colaCorriendo.push(procesoACorrer);
         }
-        else if (colaCorriendo[0].tComputoParcialQuantum == quantum && colaCorriendo[0].tComputoParcialQuantum == colaCorriendo[0].tRafagaCpu) { // Caso completó rafaga dentro del tiempo del quantum
+        else if ((colaCorriendo[0].tComputoParcialQuantum == quantum) && (colaCorriendo[0].tComputoParcialQuantum == colaCorriendo[0].tRafagaCpu)) { // Caso completó rafaga dentro del tiempo del quantum
             desasignarCpu();
-            let procesoACorrer = colaListos.shift();
-            colaCorriendo.push(procesoACorrer);
         } 
-    } else if (colaListos.length > 0) {
+    }
+
+    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
     }
+    //
+    // Sino será tiempo de Cpu desperdiciado
 }
 
 // Comparamos las duraciones de ráfagas para qudarnos con la más corta y asignar el proceso correspondiente a la cpu
 function spn() {
     console.log('Dentro de SPN');
 
-    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) {
-        desasignarCpu();
-        let duracionRafagas = [];
-        colaListos.forEach(p => duracionRafagas.push(p.tRafagaCpu));
-        let masCorto = Math.min.apply(null, duracionRafagas);
-        let idx = duracionRafagas.indexOf(masCorto);
-        let procesoACorrer = colaListos.splice(idx, idx+1);
-        colaCorriendo.push(procesoACorrer);
-    
-    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) desasignarCpu();
+
+    // Para no duplicar código no encadeno los if's  como hacía antes
+
+    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
         let duracionRafagas = [];
         colaListos.forEach(p => duracionRafagas.push(p.tRafagaCpu));
         let masCorto = Math.min.apply(null, duracionRafagas);
@@ -134,14 +143,16 @@ function spn() {
         let procesoACorrer = colaListos.splice(idx, idx+1);
         colaCorriendo.push(procesoACorrer);
     }
+    //
+    // Sino será tiempo de Cpu desperdiciado
 }
 
 function srt(procesosMovidos) {
     console.log('Dentro de SRT');
     let duracionRafagas = [];
 
-    if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) {
-        if (colaCorriendo[0].tComputoParcialCpu < tRafagaCpu) {
+    if (colaCorriendo.length > 0) {
+        if ((colaCorriendo[0].tComputoParcialCpu < tRafagaCpu) && (procesosMovidos.length > 0)) {
             procesosMovidos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
             let masCorta = Math.min.apply(null, duracionRafagas);
             
@@ -155,7 +166,8 @@ function srt(procesosMovidos) {
                 colaCorriendo.push(procesoACorrer);
                 colaListos.push(procesoCorriendo);
             }
-        } else desasignarCpu(); // Bloquea el proceso si todavía le faltan rafagas por ejecutar
+        // } else if () {              // OJO, PORQUE SI OCURRE QUE EL PRIMERO ES TRUE, PERO EL SEGUNDO FALSE, NO DEBE DESASIGNARSE LA CPU... Sería el siguiente caso: donde el proceso no terminó su ráfaga y además no hay procesos nuevos para comparar, debería seguir ejecutando
+        } else desasignarCpu();        // El proceso terminó y no había procesos recién movidos, hay que ver si hay procesos en cola listos que quieran entrar. O resolverlo con el if de abajo corriendo==0 y listos>0
     
     } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // No hay procesos corriendo y hay procesos en cola. Elijo el de duración de ráfga más corta para que continúe.
         duracionRafagas = [];
@@ -189,6 +201,7 @@ function moverProcesosAColaListos() {
     //     procesosAMover,
     //     colaListos
     // });
+
     procesosAMover.forEach(a => console.log('Procesos a mover Pid: '+a.id));
 
 
@@ -234,7 +247,7 @@ function desasignarCpu() {
         //     colaBloqueados,
         //     colaCorriendo
         // });
-        colaBloqueados.forEach(p => console.log('Procesos en colaBloqueados: '+p.id));
+        colaBloqueados.forEach(p => console.log('Procesos en colaBloqueados Pid: '+p.id));
         //
     } else {
         if (tComputoTfp < tfp) { // aplicar TFP
@@ -258,13 +271,17 @@ function terminarCiclo() {
     // Hay proceso haciendo uso de cpu? 
     if (colaCorriendo.length > 0) { // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
         
-        // console.log({
-        //     msg: "Aplicando tip, tcp o tfp",
-        //     colaCorriendo
-        // });
+        const largo = colaCorriendo.length;
+        if (colaCorriendo)
+        console.log({
+            
+            colaCorriendo,
+            msg: "largo: ",
+            largo
+        });
 
         // Aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
-        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
+        if ((colaCorriendo[0]?.tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
             console.log("Entré al if");
             tComputoTip += 1;
             tCpuDesocupada += 1;
@@ -313,6 +330,7 @@ function main() {
     console.log('Comenzando simulación...');
     const planificacion = 1; // Hardcodeado
     while (colaTerminados.length < cantProcesos) {
+        console.log('Length colaTerminados: '+colaTerminados.length);
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
         terminarCiclo();
