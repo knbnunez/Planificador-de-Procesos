@@ -161,7 +161,8 @@ function srt(procesosMovidos) {
 // Filtra los procesos nuevos y bloqueados que están listos para ser movidos a la cola de listos,
 // si exisiteron procesos listos para mover, se mueven a la cola de listos.
 function moverProcesosAColaListos() {
-    console.log('Dentro de moviendo a cola listos');
+    console.log('Moviendo procesos a cola de listos...');
+    console.log('Procesos en cola de listos: '+ colaListos);
 
     let nuevosAMover = colaNuevos.filter(proceso => proceso.tArribo == tiempo);
     let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoES == proceso.tRafagaES);    
@@ -172,6 +173,7 @@ function moverProcesosAColaListos() {
     
     colaListos = colaListos.concat(procesosAMover);
     
+    console.log('Procesos a mover: '+ procesosAMover);
     return procesosAMover;
 }
 
@@ -225,7 +227,8 @@ function terminarCiclo() {
     console.log('Dentro de terminar ciclo');
 
     // Mejor (...length == 1)
-    console.log(colaCorriendo[0]);
+    console.log("lenght colaCorriendo: "+colaCorriendo.length);
+    console.log("lenght colaCorriendo[0]: "+colaCorriendo[0]);
     // Hay proceso haciendo uso de cpu? 
     if (colaCorriendo.length > 0) { 
         // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
@@ -259,19 +262,17 @@ function terminarCiclo() {
 ////////////////////////////////////////////////////////////////////////
 
 function main() {
-    console.log('dentro de main');
+    console.log('Comenzando simulación...');
     const planificacion = 1; // Hardcodeado
     while (colaTerminados.length < cantProcesos) {
-        console.log("Ejectua el while main: "+tiempo);
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
-        console.log("Asignó procesos a cpu");
         terminarCiclo();
-        console.log("");
-        console.log("-----------------------");
-        console.log("");
+        console.log('');
+        console.log('-----------------------');
+        console.log('');
     }
-    console.log("Tiempo de uso de CPU: "+tUsoCpu);
+    console.log('Tiempo de uso de CPU: '+tUsoCpu);
 }
 
 

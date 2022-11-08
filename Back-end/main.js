@@ -10,5 +10,5 @@ app.use('/', router);
 
 // Inicio la app en modo escucha
 app.listen(port, () => {
-  console.log(`API escuchando en el puerto: ${port}`)
+  console.log(`API escuchando en el puerto: ${port}, ingrese a http://localhost:3000/`)
 });
