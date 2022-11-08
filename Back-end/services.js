@@ -30,17 +30,29 @@ let quantum = 0;        // Lo ingresa el usuario
 
 // Funciones de planificación
 function fcfs() {
+    //
     console.log('Dentro de FCFS');
+    //
     // Puedo permiterme hacer esto en lugar de encadenar if's porque comparo con AND, entonces si en el recorrido de la condición encuentra que una no se cumple sale de inmediato (corto circuito)
     if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) {
         console.log("Se entró en el 1° if de fcfs");
         desasignarCpu();
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
-    
+        
+        // console.log({
+        //     msg: "Asignando proceso a Cpu",
+        //     colaCorriendo
+        // });
+        //
+        if(colaCorriendo.length>0)console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0].id);
+        //
     } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
+        //
+        console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0].id);
+        //
     } // Sino sigo esperando que finalice el proceso
 }
 
@@ -161,11 +173,9 @@ function srt(procesosMovidos) {
 // Filtra los procesos nuevos y bloqueados que están listos para ser movidos a la cola de listos,
 // si exisiteron procesos listos para mover, se mueven a la cola de listos.
 function moverProcesosAColaListos() {
-    console.log('Moviendo procesos a cola de listos...');
-    console.log('Procesos en cola de listos: '+ colaListos);
 
     let nuevosAMover = colaNuevos.filter(proceso => proceso.tArribo == tiempo);
-    let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoES == proceso.tRafagaES);    
+    let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoParcialES == proceso.tRafagaES);    
     
     let procesosAMover = [];
     nuevosAMover.forEach(proceso => procesosAMover.push(proceso));
@@ -173,7 +183,15 @@ function moverProcesosAColaListos() {
     
     colaListos = colaListos.concat(procesosAMover);
     
-    console.log('Procesos a mover: '+ procesosAMover);
+    // console.log({
+    //     msg: "Procesos movidos",
+    //     tiempo,
+    //     procesosAMover,
+    //     colaListos
+    // });
+    procesosAMover.forEach(a => console.log('Procesos a mover Pid: '+a.id));
+
+
     return procesosAMover;
 }
 
@@ -204,9 +222,20 @@ function desasignarCpu() {
 
     if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) {
         let procesoADesasignar = colaCorriendo.pop();
+        //
+        console.log('Proceso a desasignar Pid: '+procesoADesasignar.id);
+        //
         procesoADesasignar.tComputoTotalCpu += procesoADesasignar.tComputoParcialCpu;
         procesoADesasignar.tComputoParcialCpu = 0;
         colaBloqueados.push(procesoADesasignar);
+        //
+        // console.log({
+        //     msg: "Proceso movido a colaBloqueados",
+        //     colaBloqueados,
+        //     colaCorriendo
+        // });
+        colaBloqueados.forEach(p => console.log('Procesos en colaBloqueados: '+p.id));
+        //
     } else {
         if (tComputoTfp < tfp) { // aplicar TFP
             tComputoTfp += 1;  
@@ -226,37 +255,56 @@ function desasignarCpu() {
 function terminarCiclo() {
     console.log('Dentro de terminar ciclo');
 
-    // Mejor (...length == 1)
-    console.log("lenght colaCorriendo: "+colaCorriendo.length);
-    console.log("lenght colaCorriendo[0]: "+colaCorriendo[0]);
     // Hay proceso haciendo uso de cpu? 
-    if (colaCorriendo.length > 0) { 
-        // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
-        // console.log("dentro de terminar ciclo");
-        console.log(colaCorriendo[0].tComputoTotalCpu);
+    if (colaCorriendo.length > 0) { // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
+        
+        // console.log({
+        //     msg: "Aplicando tip, tcp o tfp",
+        //     colaCorriendo
+        // });
+
         // Aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
-        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip != tip)) {          
+        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
             console.log("Entré al if");
             tComputoTip += 1;
             tCpuDesocupada += 1;
             tUsoSo += 1;
+
        } else if (((colaCorriendo[0].tComputoParcialCpu == 0) && (tComputoTcp < tcp)) || ((colaCorriendo[0].fuePausado == true) && (tComputoTcp < tcp))) {
             tComputoTcp += 1;
             tCpuDesocupada += 1;
             tUsoSo += 1;
+
         } else {                                                                     //cuando temrina puede comenzar a computar rafaga parcial de cpu
             tComputoTip = 0;
             tComputoTcp = 0;
             colaCorriendo[0].fuePausado = false;
             colaCorriendo[0].tComputoParcialCpu += 1;
             tUsoCpu += 1;
+            //
+            // console.log({
+            //     msg: "Proceso corriendo",
+            //     colaCorriendo,
+            //     tUsoCpu
+            // });
+            console.log('Terminando Ciclo colaCorriendo Pid: '+colaCorriendo[0].id+' Uso de Cpu: '+tUsoCpu);
+            //
         }
+
     } else {
-        console.log("O entra acá?");
+        
+        console.log({
+            msg: "Cpu desocupada",
+            colaCorriendo
+        });
+        
         tCpuDesocupada += 1;
     }
 
+    if (colaBloqueados.length > 0) colaBloqueados.forEach(p => p.tComputoParcialES += 1)
+
     tiempo += 1;
+    console.log('Tiempo '+tiempo);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -299,11 +347,11 @@ function tratarArchivo(archivo) {
     });
     
     console.log({
-        msg: "antes del main",
+        msg: "Procesos cargados en colaNuevos",
         colaNuevos,
-        cantProcesos, 
-        // listaProcesos
+        cantProcesos
     });
+
     main();
 }
 
