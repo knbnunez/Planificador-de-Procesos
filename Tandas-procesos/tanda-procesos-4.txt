@@ -4,31 +4,31 @@
 		tArribo: 0,
 		cantRafagas: 2,
 		tRafagaCpu: 10,
-		tRafagaES: 20,
+		tRafagaES: 25,
 		prioridad: 2
 	},
 	{
 		id: 2,
-		tArribo: 2,
-		cantRafagas: 1,
+		tArribo: 1.5,
+		cantRafagas: 20,
 		tRafagaCpu: 4,
-		tRafagaES: 14,
+		tRafagaES: 25,
 		prioridad: 1
 	},
 	{
 		id: 3,
-		tArribo: 1,
-		cantRafagas: 1,
-		tRafagaCpu: 10,
-		tRafagaES: 10,
+		tArribo: 8,
+		cantRafagas: 3,
+		tRafagaCpu: 5,
+		tRafagaES: 25,
 		prioridad: 45
 	},
 	{
 		id: 4,
 		tArribo: 10,
-		cantRafagas: 1,
+		cantRafagas: 2,
 		tRafagaCpu: 15,
-		tRafagaES: 30,
+		tRafagaES: 25,
 		prioridad: 100
 	},
 ]
