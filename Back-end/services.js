@@ -289,6 +289,7 @@ function desasignarCpu() {
         if (tComputoTfp < tfp) { // aplicar TFP
             tComputoTfp += 1;  
         } else {
+            console.log('Entra acá? Sin tfp');
             tComputoTfp = 0;
             let procesoADesasignar = colaCorriendo.pop();
             colaTerminados.push(procesoADesasignar);
