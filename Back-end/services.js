@@ -44,21 +44,15 @@ function fcfs() {
         });
         //
         desasignarCpu();
-        if (colaListos.length > 0) {
-            let procesoACorrer = colaListos.shift();
-            colaCorriendo.push(procesoACorrer);
-        }
-        //
-        console.log({
-            msg: "Proceso shifteado de la colaListos",
-            procesoACorrer,
-            msg:"Proceso pusheado a la colaCorriendo",
-            colaCorriendo
-        });
-        //
+        // if (colaListos.length > 0) {
+        //     let procesoACorrer = colaListos.shift();
+        //     colaCorriendo.push(procesoACorrer);
+        // }
         console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0]?.id);
         //
-    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // Caso Cpu libre y hay procesos en cola de listos
+    } 
+    //
+    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // Caso Cpu libre y hay procesos en cola de listos
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
         //
@@ -152,7 +146,7 @@ function srt(procesosMovidos) {
     let duracionRafagas = [];
 
     if (colaCorriendo.length > 0) {
-        if ((colaCorriendo[0].tComputoParcialCpu < tRafagaCpu) && (procesosMovidos.length > 0)) {
+        if ((colaCorriendo[0].tComputoParcialCpu < tRafagaCpu) && (procesosMovidos.length > 0)) { // Sino hay procesos movidos, y la ráfaga de cpu todavía no se completó, no hago nada, seguiré ejecutando...
             procesosMovidos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
             let masCorta = Math.min.apply(null, duracionRafagas);
             
@@ -161,15 +155,17 @@ function srt(procesosMovidos) {
                 let idx = colaListos.indexOf(procesoACorrer);
                 let procesoACorrer = colaListos.splice(idx, idx+1);
 
-                // Desasigno Cpu, pero entra en cola de listos, por lo que volverá a ejectuar.
-                let procesoCorriendo = colaCorriendo.pop();
-                colaCorriendo.push(procesoACorrer);
+                let procesoCorriendo = colaCorriendo.pop(); // Desasigno Cpu, pero entra en cola de listos, por lo que volverá a ejectuar luego.
+                procesoCorriendo.fuePausado = true;
                 colaListos.push(procesoCorriendo);
+
+                colaCorriendo.push(procesoACorrer);
             }
-        // } else if () {              // OJO, PORQUE SI OCURRE QUE EL PRIMERO ES TRUE, PERO EL SEGUNDO FALSE, NO DEBE DESASIGNARSE LA CPU... Sería el siguiente caso: donde el proceso no terminó su ráfaga y además no hay procesos nuevos para comparar, debería seguir ejecutando
-        } else desasignarCpu();        // El proceso terminó y no había procesos recién movidos, hay que ver si hay procesos en cola listos que quieran entrar. O resolverlo con el if de abajo corriendo==0 y listos>0
-    
-    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // No hay procesos corriendo y hay procesos en cola. Elijo el de duración de ráfga más corta para que continúe.
+        
+        } else if (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu) desasignarCpu();
+    }
+    //
+    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // No hay procesos corriendo y hay procesos en cola. Elijo el de duración de ráfga más corta para que continúe.
         duracionRafagas = [];
         colaListos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
         let masCorta = Math.min.apply(null, duracionRafagas);
@@ -338,9 +334,8 @@ function main() {
         console.log('-----------------------');
         console.log('');
     }
-    console.log('Tiempo de uso de CPU: '+tUsoCpu);
+    console.log('Fin de ejecución, tiempo de uso de CPU: '+tUsoCpu);
 }
-
 
 // Desencadenador
 
