@@ -30,34 +30,15 @@ let quantum = 0;        // Lo ingresa el usuario
 
 // Funciones de planificación
 function fcfs() {
-    //
     // console.log('Dentro de FCFS');
-    //
-    // Puedo permiterme hacer esto en lugar de encadenar if's porque comparo con AND, entonces si en el recorrido de la condición encuentra que una no se cumple sale de inmediato (corto circuito)
+
     if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) { // Caso se completó la ráfaga de Cpu
-        //
-        // console.log("Se entró en el 1° if de fcfs");
-        // if (colaCorriendo === undefined) return;
-        // console.log({
-        //     msg: "Contenido de colaListos",
-        //     colaListos
-        // });
-        //
         desasignarCpu();
-        // if (colaListos.length > 0) {
-        //     let procesoACorrer = colaListos.shift();
-        //     colaCorriendo.push(procesoACorrer);
-        // }
-        // console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0]?.id);
-        //
     } 
-    //
+
     if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // Caso Cpu libre y hay procesos en cola de listos
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
-        //
-        // console.log('En FCFS colaCorriendo Pid: '+colaCorriendo[0].id);
-        //
     }
     // Sino será tiempo de Cpu desperdiciado
 }
@@ -364,7 +345,9 @@ function terminarCiclo() {
     if (colaBloqueados.length > 0) colaBloqueados.forEach(p => p.tComputoParcialES += 1);
     if (colaListos.length > 0) colaListos.forEach(p => p.tEspera += 1);
 
-    tiempo += 1;
+
+    // O el tiempo debería sumarse al principio??? Revisar!
+    tiempo += 1; 
     //
     // console.log({
     //     msg: "Tiempo: ", tiempo,
@@ -435,20 +418,33 @@ function main() {
     const planificacion = 1; // Hardcodeado
     // for (let index = 0; index < 120; index++) {
     // while (colaTerminados.length < cantProcesos) {
-    while (tiempo < 12) {
+    while (tiempo < 61) {
         // console.log('Length colaTerminados: '+colaTerminados.length);
         console.log('Tiempo: '+tiempo);
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
         terminarCiclo();
         // console.log('');
-        // console.log('-----------------------');
+        console.log('-----------------------');
         // console.log('');
-        console.log();
     }
     
+    // No estan entrando a la cola de terminados, para el tiempo = 105 deberían estar todos en cola de terminados...
+    // Parece que no estan entrando porque suma (+1) de más al tComputoParcialES.
+    // Para la simulación de tiempo 61, me encontré con que p1 está en cola de bloqueados con un tComputoParcialES = 26, cuando el máximo debería ser = 25... Chequear la sumada de valores a bloqueados
+
     // Finalizando imprimo
+    console.log({
+        colaNuevos, 
+        colaListos, 
+
+        colaCorriendo, 
+        colaBloqueados,
+        colaTerminados
+    });
     imprimirResultados();    
+
+    // Generación de archivo
     const resultado = {
         colaNuevos,
         colaListos,
@@ -457,11 +453,7 @@ function main() {
         colaTerminados
     };
     const resultadoStr = JSON.stringify(resultado);
-    //
-    // var blob = new Blob([contents], { type: 'text/plain' });
-    // var file = new File([blob], "foo.txt", {type: "text/plain"});
     fs.writeFileSync("../Tandas-procesos/resultado.txt", resultadoStr);
-    //
     console.log(resultadoStr);
 }
 
@@ -484,9 +476,9 @@ function tratarArchivo(archivo) {
         },
         {
             id: 2,
-            tArribo: 1.5,
-            cantRafagas: 20,
-            tRafagaCpu: 4,
+            tArribo: 4,
+            cantRafagas: 1.5,
+            tRafagaCpu: 20,
             tRafagaES: 25,
             prioridad: 1
         },
