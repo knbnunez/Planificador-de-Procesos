@@ -14,12 +14,12 @@ let colaTerminados = [];
 //
 let tiempo = 0;
 //
-let tip = 0;            // Tiempo de Inicio de Proceso (TIP) + Lo ingresa el usuario
-let tcp = 0;            // Tiempo de Conmutación entre Procesos (TCP) + Lo ingresa el usuario
-let tfp = 0;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
 let tComputoTip = 0;
+let tip = 0;            // Tiempo de Inicio de Proceso (TIP) + Lo ingresa el usuario
 let tComputoTcp = 0;
+let tcp = 0;            // Tiempo de Conmutación entre Procesos (TCP) + Lo ingresa el usuario
 let tComputoTfp = 0;
+let tfp = 0;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
 //
 let tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
 let tUsoSo = 0;         // Computo de TIP, TCP y TFP
@@ -32,7 +32,7 @@ let quantum = 0;        // Lo ingresa el usuario
 function fcfs() {
     // console.log('Dentro de FCFS');
 
-    if (((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) || (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tCpuTotal)) { // Caso se completó la ráfaga de Cpu
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) { // Caso se completó la ráfaga de Cpu
         desasignarCpu();
     } 
 
@@ -255,7 +255,7 @@ function desasignarCpu() {
             let procesoADesasignar = colaCorriendo.pop();
             colaTerminados.push(procesoADesasignar);
             procesoADesasignar.tRetorno = tiempo;
-            console.log('Finalizando ejecución... P'+procesoADesasignar.id);
+            console.log('Entrando a cola de Terminados... P'+procesoADesasignar.id);
         }  
     }
 }
@@ -305,8 +305,7 @@ function imprimirResultados() {
     console.log({
         msg1: `Tiempo de finalización ${tiempo}`,
         msg2: `Tiempo de CPU ${tUsoCpu}`,
-        msg3: `Tiempo de SO ${tUsoSo}`,
-        msg4: `Estado de la cola de terminados ${colaTerminados.length}`
+        msg3: `Tiempo de SO ${tUsoSo}`
     });
 
     colaTerminados.forEach(p => {
@@ -344,7 +343,7 @@ function imprimirResultados() {
     colaTerminados.forEach(p => {
         console.log({
             msg1: `Porcentuales:`,
-            msg2: `Para ${p.id}: ${Math.round((cantRafagas - 1)(p.tComputoTotalCpu * 100)/tUsoCpu)}`,
+            msg2: `Para ${p.id}: ${Math.round((p.tComputoTotalCpu * 100)/tUsoCpu)}`,
         });
     });
         
@@ -353,8 +352,8 @@ function imprimirResultados() {
 
 function main() {
     const planificacion = 1; // Hardcodeado
-    // while (colaTerminados.length < cantProcesos) {
-    while (tiempo < 107) {
+    while (colaTerminados.length < cantProcesos) {
+    // while (tiempo < 107) {
         // console.log('Length colaTerminados: '+colaTerminados.length);
         console.log({tiempo});
         let procesosMovidos = moverProcesosAColaListos();
@@ -399,7 +398,8 @@ function tratarArchivo(archivo) {
     // const contenidoDelArchivoString = contenidoDelArchivo.toString()
     // var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
     // Data del archivo hardcodeado, descomentar lo de arriba
-    var listaProcesos = [
+    
+    var listaProcesos = [ //COnsidero 
         {
             id: 1,
             tArribo: 0,
@@ -411,7 +411,7 @@ function tratarArchivo(archivo) {
         {
             id: 2,
             tArribo: 4,
-            cantRafagas: 1.5,
+            cantRafagas: 2,
             tRafagaCpu: 20,
             tRafagaES: 25,
             prioridad: 1
