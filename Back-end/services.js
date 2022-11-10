@@ -32,13 +32,14 @@ let quantum = 0;        // Lo ingresa el usuario
 function fcfs() {
     // console.log('Dentro de FCFS');
 
-    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) { // Caso se completó la ráfaga de Cpu
+    if (((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) || (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tCpuTotal)) { // Caso se completó la ráfaga de Cpu
         desasignarCpu();
     } 
 
     if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // Caso Cpu libre y hay procesos en cola de listos
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
+        console.log('Comenzando a hacer uso de CPU... P'+procesoACorrer.id);
     }
     // Sino será tiempo de Cpu desperdiciado
 }
@@ -162,36 +163,18 @@ function srt(procesosMovidos) {
 // Filtra los procesos nuevos y bloqueados que están listos para ser movidos a la cola de listos,
 // si exisiteron procesos listos para mover, se mueven a la cola de listos.
 function moverProcesosAColaListos() {
-    //
-    // console.log('Moviendo procesos a cola de listos');
-    //
-    // No estoy popeando los procesos de la cola, debería sacarlos
-    // let nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
-    // nuevosAMover.forEach(i => {
-    //     colaNuevos.forEach((j, idx) => {
-    //         if (i.id == j.id) colaNuevos.splice(idx, idx+1);
-    //     });
-    // });
-    // Lo mismo
-    // let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoParcialES == proceso.tRafagaES);    
-    // let bloqueadosAMover = colaBloqueados.forEach(p => {
-    //     if (p.tComputoParcialES == p.tRafagaES) return colaBloqueados.pop();
-    // });
-    // let bloqueadosAMover = colaBloqueados.filter(p => p.tComputoParcialES == p.tRafagaES);
-    // bloqueadosAMover.forEach(i => {
-    //     colaBloqueados.forEach((j, idx) => {
-    //         if (i.id == j.id) colaBloqueados.splice(idx, idx+1);
-    //     });
-    // });
-    // let nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
-    // for (let i = 0; i < nuevosAMover.length; i++) {
-    //     for (let j = 0; j < colaNuevos.length; j++) {
-    //         if (nuevosAMover[i].id == colaNuevos[j].id) colaNuevos.splice(j, j+1);
-    //     }
-    // }
+    let nuevosAMover = [];
+    let bloqueadosAMover = [];
+    let procesosAMover = [];
 
-    let nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
-    colaNuevos = colaNuevos.filter(p => p.tArribo != tiempo);
+    if (colaNuevos.length > 0) {
+        nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
+        colaNuevos = colaNuevos.filter(p => p.tArribo != tiempo);
+        if (nuevosAMover.length > 0) {
+            colaNuevos.forEach((p) => console.log('colaNuevos P'+p.id));
+            nuevosAMover.forEach((p) => console.log('nuevosAMover P'+p.id));
+        }
+    }
 
     // let bloqueadosAMover = colaBloqueados.filter(p => p.tComputoParcialES == p.tRafagaES);
     // for (let i = 0; i < bloqueadosAMover.length; i++) {
@@ -200,34 +183,26 @@ function moverProcesosAColaListos() {
     //     }
     // }
 
-    let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoParcialES == proceso.tRafagaES);
-    colaBloqueados = colaBloqueados.filter(proceso => proceso.tComputoParcialES != proceso.tRafagaES);
+    // NO SE ESTAN MOVIENDO LOS PROCESOS DE LA COLA DE BLOQUEADOS
+    if (colaBloqueados.length > 0) {
+        console.log('Moviendo de cola BLOQUEADOS Length:',colaBloqueados.length,'a cola LISTOS');
+        bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoParcialES == proceso.tRafagaES);
+        colaBloqueados = colaBloqueados.filter(proceso => proceso.tComputoParcialES != proceso.tRafagaES);
+        if (bloqueadosAMover.length > 0) {
+            colaBloqueados.forEach((p) => console.log('colaBloqueados'+p.id));
+            bloqueadosAMover.forEach((p) => {
+                console.log('bloqueadosAMover P'+p.id);
+                p.tComputoTotalES += p.tComputoParcialES;
+                p.tComputoParcialES = 0;
+            });
+        }
+    }
 
-    
-    let procesosAMover = [];
-    // nuevosAMover.forEach(proceso => procesosAMover.push(proceso));
-    // bloqueadosAMover.forEach(proceso => procesosAMover.push(proceso));
-    // for (const p of nuevosAMover) procesosAMover.push(p);
-    // for (const p of bloqueadosAMover) procesosAMover.push(p);
-
-    // console.log('Tiempo '+tiempo);
-    // console.log({
-    //     colaNuevos,
-    //     nuevosAMover,
-    //     colaBloqueados,
-    //     bloqueadosAMover,
-    //     procesosAMover,
-    // });
-    procesosAMover = procesosAMover.concat(nuevosAMover, bloqueadosAMover);
-
-    colaListos = colaListos.concat(procesosAMover);
-    
-    // console.log({
-    //     msg: "Procesos movidos",
-    //     tiempo,
-    //     procesosAMover,
-    //     colaListos
-    // });
+    if ((nuevosAMover.length > 0) || (bloqueadosAMover.length > 0)) {
+        procesosAMover = procesosAMover.concat(nuevosAMover, bloqueadosAMover);
+        if (procesosAMover.length > 0) procesosAMover.forEach((p) => console.log('Moviendo procesos a cola de listos P'+p.id));
+        colaListos = colaListos.concat(procesosAMover);
+    }
 
     return procesosAMover;
 }
@@ -255,33 +230,32 @@ function asignarCpu(planificacion, procesosMovidos) {
 // Desasigna Cpu y decide si enviarlo a la cola de bloqueados, sino será enviado a la cola de terminados luego de unos ciclos
 function desasignarCpu() {
     // console.log('Dentro de Desasignar cpu');
+    colaCorriendo[0].tComputoTotalCpu += colaCorriendo[0].tComputoParcialCpu;
+    colaCorriendo[0].tComputoParcialCpu = 0;
 
-    if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) {
+    // Caso: Todavía le quedan ráfagas por ejecutar => entra a cola de bloqueados
+    if (colaCorriendo[0].tComputoTotalCpu < colaCorriendo[0].tCpuTotal) {
         let procesoADesasignar = colaCorriendo.pop();
-        //
-        // console.log('Proceso a desasignar Pid: '+procesoADesasignar.id);
-        //
-        procesoADesasignar.tComputoTotalCpu += procesoADesasignar.tComputoParcialCpu;
-        procesoADesasignar.tComputoParcialCpu = 0;
         colaBloqueados.push(procesoADesasignar);
-        //
-        // console.log({
-        //     msg: "Proceso movido a colaBloqueados",
-        //     colaBloqueados,
-        //     colaCorriendo
-        // });
-        // colaBloqueados.forEach(p => console.log('Procesos en colaBloqueados Pid: '+p.id));
-        //
-    } else if (colaCorriendo[0].tComputoTotalCpu == colaCorriendo[0].tCpuTotal) {
-        console.log('Entra acá?');
-        if (tComputoTfp < tfp) { // aplicar TFP
+        
+        console.log({
+            procesoADesasignar: 'P'+procesoADesasignar.id,
+            ComputoTotalES: procesoADesasignar.tComputoTotalES,
+            TotalES: procesoADesasignar.tESTotal,
+            EstadoColaBloqueados: colaBloqueados
+        });
+
+    // Caso: Ya no tiene más ráfagas de CPU por ejecutar, debe ejecutar TFP y entrar en cola de terminados
+    } else {
+        // Sumo cómputo de TFP hasta que sea = a TFP (total), luego entra a cola de terminados
+        if (tComputoTfp < tfp) { 
             tComputoTfp += 1;  
         } else {
-            console.log('Entra acá? Sin tfp');
             tComputoTfp = 0;
             let procesoADesasignar = colaCorriendo.pop();
             colaTerminados.push(procesoADesasignar);
             procesoADesasignar.tRetorno = tiempo;
+            console.log('Finalizando ejecución... P'+procesoADesasignar.id);
         }  
     }
 }
@@ -290,20 +264,9 @@ function desasignarCpu() {
 // REVISAR //
 // Seguramente me falte sumar más tiempos, y calcular más cosas...
 function terminarCiclo() {
-    // console.log('Dentro de terminar ciclo');
-
     // Hay proceso haciendo uso de cpu? 
     if (colaCorriendo.length > 0) { // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
         
-        // const largo = colaCorriendo.length;
-        // if (colaCorriendo)
-        // console.log({
-            
-        //     colaCorriendo,
-        //     msg: "largo: ",
-        //     largo
-        // });
-
         // Aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
         if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
             // console.log("Entré al if");
@@ -322,42 +285,17 @@ function terminarCiclo() {
             colaCorriendo[0].fuePausado = false;
             colaCorriendo[0].tComputoParcialCpu += 1;
             tUsoCpu += 1;
-            //
-            // console.log({
-            //     msg: "Proceso corriendo",
-            //     colaCorriendo,
-            //     tUsoCpu
-            // });
-            // console.log('Terminando Ciclo colaCorriendo Pid: '+colaCorriendo[0].id+' Uso de Cpu: '+tUsoCpu);
-            //
         }
 
     } else {
-        
-        // console.log({
-        //     msg: "Cpu desocupada",
-        //     colaCorriendo
-        // });
-        
         tCpuDesocupada += 1;
     }
 
     if (colaBloqueados.length > 0) colaBloqueados.forEach(p => p.tComputoParcialES += 1);
+
     if (colaListos.length > 0) colaListos.forEach(p => p.tEspera += 1);
 
-
-    // O el tiempo debería sumarse al principio??? Revisar!
-    tiempo += 1; 
-    //
-    // console.log({
-    //     msg: "Tiempo: ", tiempo,
-    //     colaNuevos,
-    //     colaListos,
-    //     colaCorriendo,
-    //     colaBloqueados,
-    //     colaTerminados
-    // });
-    //
+    tiempo += 1;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -406,7 +344,7 @@ function imprimirResultados() {
     colaTerminados.forEach(p => {
         console.log({
             msg1: `Porcentuales:`,
-            msg2: `Para ${p.id}: ${(p.tComputoTotalCpu * 100)/tUsoCpu}`,
+            msg2: `Para ${p.id}: ${Math.round((cantRafagas - 1)(p.tComputoTotalCpu * 100)/tUsoCpu)}`,
         });
     });
         
@@ -414,24 +352,19 @@ function imprimirResultados() {
 
 
 function main() {
-    // console.log('Comenzando simulación...');
     const planificacion = 1; // Hardcodeado
-    // for (let index = 0; index < 120; index++) {
     // while (colaTerminados.length < cantProcesos) {
-    while (tiempo < 61) {
+    while (tiempo < 107) {
         // console.log('Length colaTerminados: '+colaTerminados.length);
-        console.log('Tiempo: '+tiempo);
+        console.log({tiempo});
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
+        // if (tiempo == 70) console.log({colaListos, colaCorriendo}); 
         terminarCiclo();
-        // console.log('');
         console.log('-----------------------');
-        // console.log('');
     }
     
-    // No estan entrando a la cola de terminados, para el tiempo = 105 deberían estar todos en cola de terminados...
-    // Parece que no estan entrando porque suma (+1) de más al tComputoParcialES.
-    // Para la simulación de tiempo 61, me encontré con que p1 está en cola de bloqueados con un tComputoParcialES = 26, cuando el máximo debería ser = 25... Chequear la sumada de valores a bloqueados
+    // No estan entrando a la cola de terminados...
 
     // Finalizando imprimo
     console.log({
@@ -460,11 +393,12 @@ function main() {
 // Desencadenador
 
 function tratarArchivo(archivo) {
-	// const guardadoEn = archivo.filepath;
+	// NO BORRAR
+    // const guardadoEn = archivo.filepath;
 	// const contenidoDelArchivo = fs.readFileSync(guardadoEn);
     // const contenidoDelArchivoString = contenidoDelArchivo.toString()
     // var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
-    // Archivo hardcodeado, descomentar lo de arriba
+    // Data del archivo hardcodeado, descomentar lo de arriba
     var listaProcesos = [
         {
             id: 1,
@@ -509,16 +443,9 @@ function tratarArchivo(archivo) {
             p.tRafagaES,
             p.prioridad
         );
-        // console.log(objAux);
         colaNuevos.push(objAux);
         cantProcesos += 1;
     });
-    
-    // console.log({
-    //     msg: "Procesos cargados en colaNuevos",
-    //     colaNuevos,
-    //     cantProcesos
-    // });
 
     main();
     colaNuevos = [];

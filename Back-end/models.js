@@ -8,7 +8,8 @@ class Proceso {
         this.prioridad = prioridad;
         //
         this.tCpuTotal = tRafagaCpu * cantRafagas;
-        this.tESTotal = tRafagaES * (cantRafagas - 1);
+        
+        this.tESTotal = tRafagaES * Math.round(cantRafagas - 1);
         //
         this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
         this.tComputoParcialES = 0;  // x ejecución de ráfaga.
