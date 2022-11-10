@@ -12,3 +12,6 @@ app.use('/', router);
 app.listen(port, () => {
   console.log(`API escuchando en el puerto: ${port}, ingrese a http://localhost:3000/`)
 });
+
+// const tratarArchivo = require('./services');
+// tratarArchivo({});

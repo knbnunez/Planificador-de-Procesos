@@ -51,4 +51,16 @@ router.post('/upload', (request, response, next) => {
     response.send('POST REQUEST: enviaste un archivo');
 });
 
+
+router.get('/result', (request, response) => {
+	response.download('../Tandas-procesos/resultado.txt', (err) => {
+        if (err) {
+            next(err);
+            return;
+        }
+    });
+    // response.sendFile(__dirname+'/../Tandas-procesos/resultado.txt');
+});
+
+
 module.exports = router;

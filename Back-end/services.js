@@ -202,25 +202,32 @@ function moverProcesosAColaListos() {
     //         if (i.id == j.id) colaBloqueados.splice(idx, idx+1);
     //     });
     // });
-    let nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
-    for (let i = 0; i < nuevosAMover.length; i++) {
-        for (let j = 0; j < colaNuevos.length; j++) {
-            if (nuevosAMover[i].id == colaNuevos[j].id) colaNuevos.splice(j, j+1);
-        }
-    }
+    // let nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
+    // for (let i = 0; i < nuevosAMover.length; i++) {
+    //     for (let j = 0; j < colaNuevos.length; j++) {
+    //         if (nuevosAMover[i].id == colaNuevos[j].id) colaNuevos.splice(j, j+1);
+    //     }
+    // }
 
-    let bloqueadosAMover = colaBloqueados.filter(p => p.tComputoParcialES == p.tRafagaES);
-    for (let i = 0; i < bloqueadosAMover.length; i++) {
-        for (let j = 0; j < colaBloqueados.length; j++) {
-            if (bloqueadosAMover[i].id == colaBloqueados[j].id) colaBloqueados.splice(j, j+1);
-        }
-    }
+    let nuevosAMover = colaNuevos.filter(p => p.tArribo == tiempo);
+    colaNuevos = colaNuevos.filter(p => p.tArribo != tiempo);
+
+    // let bloqueadosAMover = colaBloqueados.filter(p => p.tComputoParcialES == p.tRafagaES);
+    // for (let i = 0; i < bloqueadosAMover.length; i++) {
+    //     for (let j = 0; j < colaBloqueados.length; j++) {
+    //         if (bloqueadosAMover[i].id == colaBloqueados[j].id) colaBloqueados.splice(j, j+1);
+    //     }
+    // }
+
+    let bloqueadosAMover = colaBloqueados.filter(proceso => proceso.tComputoParcialES == proceso.tRafagaES);
+    colaBloqueados = colaBloqueados.filter(proceso => proceso.tComputoParcialES != proceso.tRafagaES);
+
     
     let procesosAMover = [];
     // nuevosAMover.forEach(proceso => procesosAMover.push(proceso));
     // bloqueadosAMover.forEach(proceso => procesosAMover.push(proceso));
-    for (const p of nuevosAMover) procesosAMover.push(p);
-    for (const p of bloqueadosAMover) procesosAMover.push(p);
+    // for (const p of nuevosAMover) procesosAMover.push(p);
+    // for (const p of bloqueadosAMover) procesosAMover.push(p);
 
     // console.log('Tiempo '+tiempo);
     // console.log({
@@ -229,9 +236,9 @@ function moverProcesosAColaListos() {
     //     colaBloqueados,
     //     bloqueadosAMover,
     //     procesosAMover,
-
     // });
-    
+    procesosAMover = procesosAMover.concat(nuevosAMover, bloqueadosAMover);
+
     colaListos = colaListos.concat(procesosAMover);
     
     // console.log({
@@ -317,7 +324,7 @@ function terminarCiclo() {
         // });
 
         // Aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
-        if ((colaCorriendo[0]?.tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
+        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
             // console.log("Entré al if");
             tComputoTip += 1;
             tCpuDesocupada += 1;
@@ -426,29 +433,80 @@ function imprimirResultados() {
 function main() {
     // console.log('Comenzando simulación...');
     const planificacion = 1; // Hardcodeado
-    for (let index = 0; index < 120; index++) {
+    // for (let index = 0; index < 120; index++) {
     // while (colaTerminados.length < cantProcesos) {
+    while (tiempo < 12) {
         // console.log('Length colaTerminados: '+colaTerminados.length);
+        console.log('Tiempo: '+tiempo);
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
         terminarCiclo();
         // console.log('');
         // console.log('-----------------------');
         // console.log('');
-        console.log('Tiempo: '+tiempo);
+        console.log();
     }
     
     // Finalizando imprimo
     imprimirResultados();    
+    const resultado = {
+        colaNuevos,
+        colaListos,
+        colaCorriendo,
+        colaBloqueados,
+        colaTerminados
+    };
+    const resultadoStr = JSON.stringify(resultado);
+    //
+    // var blob = new Blob([contents], { type: 'text/plain' });
+    // var file = new File([blob], "foo.txt", {type: "text/plain"});
+    fs.writeFileSync("../Tandas-procesos/resultado.txt", resultadoStr);
+    //
+    console.log(resultadoStr);
 }
 
 // Desencadenador
 
 function tratarArchivo(archivo) {
-	const guardadoEn = archivo.filepath;
-	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
-    const contenidoDelArchivoString = contenidoDelArchivo.toString()
-    var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
+	// const guardadoEn = archivo.filepath;
+	// const contenidoDelArchivo = fs.readFileSync(guardadoEn);
+    // const contenidoDelArchivoString = contenidoDelArchivo.toString()
+    // var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
+    // Archivo hardcodeado, descomentar lo de arriba
+    var listaProcesos = [
+        {
+            id: 1,
+            tArribo: 0,
+            cantRafagas: 2,
+            tRafagaCpu: 10,
+            tRafagaES: 25,
+            prioridad: 2
+        },
+        {
+            id: 2,
+            tArribo: 1.5,
+            cantRafagas: 20,
+            tRafagaCpu: 4,
+            tRafagaES: 25,
+            prioridad: 1
+        },
+        {
+            id: 3,
+            tArribo: 8,
+            cantRafagas: 3,
+            tRafagaCpu: 5,
+            tRafagaES: 25,
+            prioridad: 45
+        },
+        {
+            id: 4,
+            tArribo: 10,
+            cantRafagas: 2,
+            tRafagaCpu: 15,
+            tRafagaES: 25,
+            prioridad: 100
+        },
+    ];
     // console.log(listaDeProcesos);
     listaProcesos.forEach(p => {
         const objAux = new Proceso(
@@ -471,6 +529,8 @@ function tratarArchivo(archivo) {
     // });
 
     main();
+    colaNuevos = [];
+    cantProcesos = 0;
 }
 
 module.exports = tratarArchivo;
