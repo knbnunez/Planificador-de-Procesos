@@ -17,6 +17,10 @@ class Proceso {
         this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
         this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
         //
+        this.tComputoTip = 0;        // para el TIP
+        this.tComputoTcp = 0;        // para el TCP
+        this.tComputoTfp = 0;        // para el TFP
+        //
         this.fuePausado = false; // solo afecta en prioridad externa y round robin (a los preemptive)
         //
         this.tRetorno = 0;

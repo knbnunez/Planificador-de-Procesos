@@ -14,12 +14,12 @@ let colaTerminados = [];
 //
 let tiempo = 0;
 //
-let tComputoTip = 0;
-let tip = 0;            // Tiempo de Inicio de Proceso (TIP) + Lo ingresa el usuario
-let tComputoTcp = 0;
-let tcp = 0;            // Tiempo de Conmutación entre Procesos (TCP) + Lo ingresa el usuario
-let tComputoTfp = 0;
-let tfp = 0;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
+// let tComputoTip = 0; en el modelo de Procesos
+let tip = 1;            // Tiempo de Inicio de Proceso (TIP) + Lo ingresa el usuario
+// let tComputoTcp = 0; en el modelo de Procesos
+let tcp = 1;            // Tiempo de Conmutación entre Procesos (TCP) + Lo ingresa el usuario
+// let tComputoTfp = 0; en el modelo de Procesos
+let tfp = 1;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
 //
 let tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
 let tUsoSo = 0;         // Computo de TIP, TCP y TFP
@@ -27,13 +27,27 @@ let tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
 //
 let quantum = 0;        // Lo ingresa el usuario
 
-
 // Funciones de planificación
 function fcfs() {
     // console.log('Dentro de FCFS');
 
     if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) { // Caso se completó la ráfaga de Cpu
-        desasignarCpu();
+        
+        if (colaCorriendo[0].tComputoTotalCpu < colaCorriendo[0].tCpuTotal) {
+            colaCorriendo[0].tComputoTotalCpu += colaCorriendo[0].tComputoParcialCpu;
+            colaCorriendo[0].tComputoParcialCpu = 0;
+        }
+
+        // LOS PROCESOS NO ESTÁN ENTRANDO A LA COLA DE TERMINADOS....
+
+        if ((colaCorriendo[0].tComputoTotalCpu == colaCorriendo[0].tCpuTotal) && (colaCorriendo[0].tComputoTfp > 0)) ejecutarTfp(); 
+        
+        
+
+        else {
+            colaCorriendo[0].tComputoTcp = 0;   // Reseteo TCP para que la próxima vez que entre a ejecutar deba esperar por la conmutación de procesos
+            desasignarCpu();                    // Lo mando a la cola de bloqueados
+        }
     } 
 
     if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // Caso Cpu libre y hay procesos en cola de listos
@@ -44,6 +58,8 @@ function fcfs() {
     // Sino será tiempo de Cpu desperdiciado
 }
 
+
+// Me parece que falta un desasignarCpu()
 function pe(procesosMovidos) {
     // console.log('Dentro de PE');
     let prioridades = [];
@@ -230,59 +246,64 @@ function asignarCpu(planificacion, procesosMovidos) {
 // Desasigna Cpu y decide si enviarlo a la cola de bloqueados, sino será enviado a la cola de terminados luego de unos ciclos
 function desasignarCpu() {
     // console.log('Dentro de Desasignar cpu');
-    colaCorriendo[0].tComputoTotalCpu += colaCorriendo[0].tComputoParcialCpu;
-    colaCorriendo[0].tComputoParcialCpu = 0;
-
-    // Caso: Todavía le quedan ráfagas por ejecutar => entra a cola de bloqueados
-    if (colaCorriendo[0].tComputoTotalCpu < colaCorriendo[0].tCpuTotal) {
-        let procesoADesasignar = colaCorriendo.pop();
-        colaBloqueados.push(procesoADesasignar);
-        
-        console.log({
-            procesoADesasignar: 'P'+procesoADesasignar.id,
-            ComputoTotalES: procesoADesasignar.tComputoTotalES,
-            TotalES: procesoADesasignar.tESTotal,
-            EstadoColaBloqueados: colaBloqueados
-        });
-
-    // Caso: Ya no tiene más ráfagas de CPU por ejecutar, debe ejecutar TFP y entrar en cola de terminados
-    } else {
-        // Sumo cómputo de TFP hasta que sea = a TFP (total), luego entra a cola de terminados
-        if (tComputoTfp < tfp) { 
-            tComputoTfp += 1;  
-        } else {
-            tComputoTfp = 0;
-            let procesoADesasignar = colaCorriendo.pop();
-            colaTerminados.push(procesoADesasignar);
-            procesoADesasignar.tRetorno = tiempo;
-            console.log('Entrando a cola de Terminados... P'+procesoADesasignar.id);
-        }  
-    }
+    // if (colaCorriendo[0].tComputoTotalCpu < colaCorriendo[0].tCpuTotal) {
+    let procesoADesasignar = colaCorriendo.pop();
+    colaBloqueados.push(procesoADesasignar);
+    
+    console.log({
+        procesoIngresandoABloqueados: 'P'+procesoADesasignar.id,
+        ComputoTotalES: procesoADesasignar.tComputoTotalES,
+        TotalES: procesoADesasignar.tESTotal,
+        ColaBloqueados: colaBloqueados
+    });
+    // }
+    return procesoADesasignar;
 }
 
+function ejecutarTip() {
+    // console.log("Entré al if");
+    colaCorriendo[0].tComputoTip += 1;
+    tCpuDesocupada += 1;
+    tUsoSo += 1;
+    console.log('TIP aplicando a P'+colaCorriendo[0].id);
+    if (colaCorriendo[0].tComputoTip == tip) console.log('TIP En el próximo turno comenzará a hacer uso de CPU P'+colaCorriendo[0].id);
+}
+
+function ejecutarTcp() {
+    colaCorriendo[0].tComputoTcp += 1;
+    tCpuDesocupada += 1;
+    tUsoSo += 1;
+    console.log('TCP aplicando a P'+colaCorriendo[0].id);
+    if (colaCorriendo[0].tComputoTcp == tcp) console.log('TCP En el próximo turno comenzará a hacer uso de CPU P'+colaCorriendo[0].id);
+}
+
+function ejecutarTfp() {
+    // Sumo cómputo de TFP hasta que sea = a TFP (total), luego entra a cola de terminados 
+    console.log('Ejecutando TFP... P'+colaCorriendo[0].id);
+    colaCorriendo[0].tComputoTfp += 1;
+    tUsoSo += 1;  
+
+    if (colaCorriendo[0].tComputoTfp == tfp) {
+        console.log('Terminando TFP, entrando a cola de Terminados... P'+colaCorriendo[0].id);
+        colaCorriendo[0].tComputoTfp = 0;
+        procesoDesasignado = desasignarCpu();
+        procesoDesasignado.tRetorno = tiempo;
+        colaTerminados.push(procesoDesasignado);
+    }  
+}
 
 // REVISAR //
 // Seguramente me falte sumar más tiempos, y calcular más cosas...
 function terminarCiclo() {
+
     // Hay proceso haciendo uso de cpu? 
     if (colaCorriendo.length > 0) { // Aplico TIP y TCP, TFP lo aplico al momento de desasignar cpu
         
-        // Aplico TIP. Cuando termina ejecuta tcp, sin resetear todavía el tComputoTip, sino en la siguiente ronda va a entrar otra vez acá
-        if ((colaCorriendo[0].tComputoTotalCpu == 0) && (tComputoTip < tip)) {          
-            // console.log("Entré al if");
-            tComputoTip += 1;
-            tCpuDesocupada += 1;
-            tUsoSo += 1;
-
-       } else if (((colaCorriendo[0].tComputoParcialCpu == 0) && (tComputoTcp < tcp)) || ((colaCorriendo[0].fuePausado == true) && (tComputoTcp < tcp))) {
-            tComputoTcp += 1;
-            tCpuDesocupada += 1;
-            tUsoSo += 1;
-
-        } else {                                                                     // Cuando temrina puede comenzar a computar rafaga parcial de cpu
-            tComputoTip = 0;
-            tComputoTcp = 0;
-            colaCorriendo[0].fuePausado = false;
+        if (colaCorriendo[0].tComputoTip < tip) {          
+            ejecutarTip();
+        } else if (((colaCorriendo[0].tComputoTcp < tcp) && (colaCorriendo[0].tComputoTotalCpu > 0)) || ((colaCorriendo[0].fuePausado == true) && (colaCorriendo[0].tComputoTcp < tcp))) {
+            ejecutarTcp();
+        } else {  
             colaCorriendo[0].tComputoParcialCpu += 1;
             tUsoCpu += 1;
         }
@@ -350,20 +371,29 @@ function imprimirResultados() {
 }
 
 
+
+
+
+
+
+// ÚLTIMO ERROR: parece que están ejecutando TCP y TFP a la vez, pero TFP se extiende más de lo esperado.
+
+
+
+
+
+
 function main() {
     const planificacion = 1; // Hardcodeado
-    while (colaTerminados.length < cantProcesos) {
-    // while (tiempo < 107) {
-        // console.log('Length colaTerminados: '+colaTerminados.length);
+    // while (colaTerminados.length < cantProcesos) {
+    while (tiempo < 100) {
         console.log({tiempo});
         let procesosMovidos = moverProcesosAColaListos();
         asignarCpu(planificacion, procesosMovidos);
-        // if (tiempo == 70) console.log({colaListos, colaCorriendo}); 
         terminarCiclo();
         console.log('-----------------------');
     }
     
-    // No estan entrando a la cola de terminados...
 
     // Finalizando imprimo
     console.log({
