@@ -2,6 +2,10 @@
 const fs = require('fs');
 const Proceso = require('./models');
 
+// Para modularizar en el futuro
+const planificaciones = require('./prueba');
+
+
 
 // Definición de variables a usar
 let cantProcesos = 0;
@@ -30,16 +34,9 @@ let quantum = 0;        // Lo ingresa el usuario
 // Funciones de planificación
 function fcfs() {
     // console.log('Dentro de FCFS');
-    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoTip < tip)) {
-        ejecutarTip();
-        return
-    }
 
     if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu < colaCorriendo[0].tRafagaCpu)) {
-        // Si todavía queda TIP por computar, computo y retorno para no seguir
-        console.log('Usando CPU... P'+colaCorriendo[0].id);
-        colaCorriendo[0].tComputoParcialCpu += 1;
-        tUsoCpu += 1;
+        ejecutarRafaga();
 
     } else if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) {
         // Ejecuto TCP si no tiene que ejecutar TFP
@@ -63,36 +60,96 @@ function fcfs() {
 
 
 // Me parece que falta un desasignarCpu()
-function pe(procesosMovidos) {
+function pe() {
     // console.log('Dentro de PE');
-    let prioridades = [];
+    // let masPrioritarioColaListos = null;
 
-    if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) { // Si no hubo nuevos arribos a la cola de listos, no me interesa cambiar, por lo tanto seguiré de largo. 
-        procesosMovidos.forEach(proceso => prioridades.push(proceso.prioridad));
-        let masAlta = Math.min.apply(null, prioridades);
-        
-        if (colaCorriendo[0].prioridad > masAlta) { // Si el proceso que está corriendo tiene un valor más alto, es porque tienen prioridad más baja.
-            procesoACorrer = colaListos.filter(proceso => proceso.prioridad == masAlta);
-            let idx = colaListos.indexOf(procesoACorrer);
-            let procesoACorrer = colaListos.splice(idx, idx+1);
-        
-            let procesoCorriendo = colaCorriendo.pop();
-            procesoCorriendo.fuePausado = true;
-        
-            colaCorriendo.push(procesoACorrer);
-            colaListos.push(procesoCorriendo);
-        } // Sino, sigue esperando en la cola de listos con el resto.
-    
-    } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
-        prioridades = [];
-        colaListos.forEach(proceso => prioridades.push(proceso.prioridad));
-        let masAlta = Math.min.apply(null, prioridades);
-        let procesoACorrer = colaListos.filter(proceso => proceso.prioridad == masAlta); // Busco
-        let idx = colaListos.indexOf(procesoACorrer);                                    // Obtengo el índice
-        procesoACorrer = colaListos.splice(idx, idx+1);                                  // Lo popeo de la cola
-        colaCorriendo.push(procesoACorrer);                                              // Le asigno la cpu
+    // Si hay procesos en cola listos, puede que haya un proceso con mayor prioridad que el que está corriendo || o simplemente calculo la prioridad 
+    if (colaListos.length > 0) masPrioritarioColaListos = getMayorPrioridad(); // Obj Proceso
+    console.log({masPrioritarioColaListos});
+
+    if (colaCorriendo.length > 0) console.log(colaCorriendo[0]);
+
+    if (
+        (colaCorriendo.length > 0) 
+        && (colaCorriendo[0].tComputoParcialCpu < colaCorriendo[0].tRafagaCpu) 
+        && (colaCorriendo[0].prioridad <= masPrioritarioColaListos.prioridad)
+    ) ejecutarRafaga(); // A MAYOR VALOR de prioridad, MENOR JERARQUÍA (prioridad) tiene el proceso...
+    //
+    else if (
+        (colaCorriendo.length > 0) 
+        && (colaCorriendo[0].tComputoParcialCpu < colaCorriendo[0].tRafagaCpu) 
+        && (colaCorriendo[0].prioridad > masPrioritarioColaListos.prioridad)
+    ) { 
+        colaCorriendo[0].fuePausado = true;
+        ejecutarTcp();
     }
-    // Sino, dejo que el proceso que está corriendo siga ejecutando o en caso de no haber ninguno, será Cpu desperdiaciada
+    //
+    else if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)) {
+        //
+        colaCorriendo[0].fuePausado = false;
+        if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) ejecutarTcp();
+        
+        // Está entrando acá y no debería...
+        else ejecutarTfp();
+    }
+
+    // Caso Cpu libre y procesos en cola listos
+    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
+        // Asignar Cpu
+        // let procesoACorrer = colaListos.splice(masPrioritarioColaListos[1], masPrioritarioColaListos[1]+1); // [1] idx
+        // colaCorriendo.push(procesoACorrer);
+        console.log(`Antes del filtro`);
+        console.log({colaListos});
+        console.log({masPrioritarioColaListos});
+
+        // Sospecho que esto es lo que no está funcionando... No termino de comprender el por qué, pero parece que no lo está sacando...
+        colaListos = colaListos.filter(p => p.id != masPrioritarioColaListos.id);
+        
+        console.log(`Después del filtro`);
+        console.log({colaListos});
+
+        colaCorriendo.push(masPrioritarioColaListos);
+        
+        // Caso primera vez que ejecuta
+        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        else pe(); // Vuelvo a entrar para computar uso de Cpu
+    }
+
+
+
+
+    // let prioridades = [];
+
+    // if ((colaCorriendo.length > 0) && (procesosMovidos.length > 0)) { // Si no hubo nuevos arribos a la cola de listos, no me interesa cambiar, por lo tanto seguiré de largo. 
+    //     //
+    //     procesosMovidos.forEach(proceso => prioridades.push(proceso.prioridad));
+    //     let masAlta = Math.min.apply(null, prioridades);
+        
+    //     if (colaCorriendo[0].prioridad > masAlta) { // Si el proceso que está corriendo tiene un valor más alto, es porque tienen prioridad más baja.
+    //         procesoACorrer = colaListos.filter(proceso => proceso.prioridad == masAlta);
+    //         let idx = colaListos.indexOf(procesoACorrer);
+    //         let procesoACorrer = colaListos.splice(idx, idx+1);
+        
+    //         let procesoCorriendo = colaCorriendo.pop();
+    //         procesoCorriendo.fuePausado = true;
+        
+    //         colaCorriendo.push(procesoACorrer);
+    //         colaListos.push(procesoCorriendo);
+    //     } else {
+    //         ejecutarRafaga();
+    //     }
+    
+    // } else if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
+    //     prioridades = [];
+    //     colaListos.forEach(proceso => prioridades.push(proceso.prioridad));
+    //     let masAlta = Math.min.apply(null, prioridades);
+    //     let procesoACorrer = colaListos.filter(proceso => proceso.prioridad == masAlta); // Busco
+    //     let idx = colaListos.indexOf(procesoACorrer);                                    // Obtengo el índice
+    //     procesoACorrer = colaListos.splice(idx, idx+1);                                  // Lo popeo de la cola
+    //     colaCorriendo.push(procesoACorrer);                                              // Le asigno la cpu
+    // }
+
 }               
 
 function rr() {
@@ -143,6 +200,7 @@ function spn() {
 
 function srt(procesosMovidos) {
     // console.log('Dentro de SRT');
+
     let duracionRafagas = [];
 
     if (colaCorriendo.length > 0) {
@@ -224,12 +282,18 @@ function moverProcesosAColaListos() {
 /* -------------------------------------------------------------------------------------------- */
 
 function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
+    // Si tiene que ejecutar tip por más de una und, ejecuto y retorno sin seguir hacia las planificaciones
+    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoTip < tip)) {
+        ejecutarTip();
+        return
+    }
+    
     switch (tipoPlanificacion) {
         case 1: //FCFS (First Come First Served)
             fcfs();
             break;
         case 2: //Prioridad Externa   
-            pe(procesosMovidos);                
+            pe();                
             break;
         case 3: //Round-Robin
             rr();
@@ -245,13 +309,28 @@ function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
 
 /* -------------------------------------------------------------------------------------------- */
 
-// asignarCpu() se asigna Cpu dentro de cada planificación, porque depende de condiciones variables
+function getMayorPrioridad() {
+    let prioridades = colaListos.map(p => p.prioridad);
+    let prioritario = colaListos.find(p => p.prioridad == Math.min.apply(null, prioridades));
+    // console.log({prioridades, prioritario}); // Obtiene correctamente el proceso más prioritario
 
-function desasignarCpu() {
-    let procesoADesasignar = colaCorriendo.pop();
-    // colaBloqueados.push(procesoADesasignar);
-    console.log('Abandonando CPU... P'+procesoADesasignar.id);    
-    return procesoADesasignar;
+
+    // // creates a new exception type:
+    // function FatalError(){ Error.apply(this, arguments); this.name = "FatalError"; }
+    // FatalError.prototype = Object.create(Error.prototype);
+
+    // // and then, use this to trigger the error:
+    // throw new FatalError("Something went badly wrong!");
+
+    return prioritario;
+}
+
+/* -------------------------------------------------------------------------------------------- */
+
+function ejecutarRafaga() {
+    console.log('Usando CPU... P'+colaCorriendo[0].id);
+    colaCorriendo[0].tComputoParcialCpu += 1;
+    tUsoCpu += 1;
 }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -275,11 +354,17 @@ function ejecutarTcp() {
     } else {
         let procesoDesasignado = desasignarCpu();
         procesoDesasignado.tComputoTcp = 0;
-        procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoParcialCpu;
-        procesoDesasignado.tComputoParcialCpu = 0;
-
-        colaBloqueados.push(procesoDesasignado);
-        console.log('Finalizó el TCP, ingresó a cola de Bloqueados: P'+procesoDesasignado.id);
+        
+        if (!procesoDesasignado.fuePausado) {
+            procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoParcialCpu;
+            procesoDesasignado.tComputoParcialCpu = 0;
+            colaBloqueados.push(procesoDesasignado);
+            console.log('Finalizó el TCP, ingresó a cola de Bloqueados: P'+procesoDesasignado.id);
+        } else {
+            colaListos.push(procesoDesasignado);
+            console.log('Finalizó el TCP, ingresó a cola de Listos porque fue Pausado, no se resetean los computos: P'+procesoDesasignado.id);
+        }
+        
     }
 }
 
@@ -299,6 +384,17 @@ function ejecutarTfp() {
         colaTerminados.push(procesoDesasignado);
         console.log('Finalizó el TFP, ingresó a la cola de TERMINADOS P'+procesoDesasignado.id);
     }  
+}
+
+/* -------------------------------------------------------------------------------------------- */
+
+// asignarCpu() se asigna Cpu dentro de cada planificación, porque depende de condiciones variables
+
+function desasignarCpu() {
+    let procesoADesasignar = colaCorriendo.pop();
+    // colaBloqueados.push(procesoADesasignar);
+    console.log('Abandonando CPU... P'+procesoADesasignar.id);    
+    return procesoADesasignar;
 }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -337,7 +433,7 @@ function imprimirResultados() {
     });
     
     let total = 0;
-    for(var i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno;
+    for(let i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno;
     let avg = total / colaTerminados.length;
     console.log({
         msg1: `Para la tanda de procesos:`,
@@ -371,9 +467,9 @@ function imprimirResultados() {
 /* -------------------------------------------------------------------------------------------- */
 
 function main() {
-    const tipoPlanificacion = 1; // Hardcodeado
+    const tipoPlanificacion = 2; // Hardcodeado
     while (colaTerminados.length < cantProcesos) {
-    // while (tiempo < 100) {
+    // while (tiempo < 32) {
         console.log({tiempo});
         let movidos = moverProcesosAColaListos();
         ejecutarPlanificacion(tipoPlanificacion, movidos);
@@ -418,7 +514,7 @@ function tratarArchivo(archivo) {
     // var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
     // Data del archivo hardcodeado, descomentar lo de arriba
     
-    var listaProcesos = [ //COnsidero 
+    var listaProcesos = [ // Considero 
         {
             id: 1,
             tArribo: 0,
@@ -465,6 +561,10 @@ function tratarArchivo(archivo) {
         colaNuevos.push(objAux);
         cantProcesos += 1;
     });
+
+    planificaciones.func1('Hola');
+    planificaciones.func2(colaNuevos);
+    console.log(colaNuevos); // No lo modifica... es pasado por valor, no por referencia al objeto
 
     main();
     colaNuevos = [];
