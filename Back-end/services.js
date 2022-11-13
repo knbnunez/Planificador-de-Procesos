@@ -19,7 +19,7 @@ let tiempo = 0;
 
 let tip = 0;            // Tiempo de Inicio de Proceso (TIP) + Lo ingresa el usuario
 let tcp = 0;            // Tiempo de Conmutación entre Procesos (TCP) + Lo ingresa el usuario
-let tfp = 1;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
+let tfp = 0;            // Tiempo de Finalización de Proceso (TFP) + Lo ingresa el usuario
 //
 let tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
 let tUsoSo = 0;         // Computo de TIP, TCP y TFP
