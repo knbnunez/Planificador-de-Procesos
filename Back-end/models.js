@@ -12,7 +12,7 @@ class Proceso {
         this.tESTotal = tRafagaES * Math.round(cantRafagas - 1);
         //
         this.tComputoParcialCpu = 0; // x ejecución de ráfaga.
-        this.tComputoParcialES = 0;  // x ejecución de ráfaga.
+        this.tComputoParcialES = 0; // x ejecución de ráfaga
         //
         this.tComputoTotalCpu = 0;   // sumatoria de ráfagas parciales.
         this.tComputoTotalES = 0;    // sumatoria de ráfagas parciales.
@@ -22,6 +22,8 @@ class Proceso {
         this.tComputoTfp = 0;        // para el TFP
         //
         this.fuePausado = false; // solo afecta en prioridad externa y round robin (a los preemptive)
+        //
+        this.tComputoQuantum = 0;  // x ejecución de acumulativo de quantum.
         //
         this.tRetorno = 0;
         this.tEspera = 0;
