@@ -69,7 +69,7 @@ function fcfs() {
 function pe() {
 
     // Si hay procesos en cola listos, puede que haya un proceso con mayor prioridad que el que está corriendo || o simplemente calculo la prioridad 
-    if (colaListos.length > 0) masPrioritarioColaListos = getMayorPrioridad(); // Obj Proceso
+    if (colaListos.length > 0) masPrioritarioColaListos = getMayorPrioridad(); // Obj Proceso. Siempre entrará acá por lo menos una vez, por lo que siempre tendrá un valor definido "masPrioritario"
     // console.log({masPrioritarioColaListos});
 
     if (
@@ -156,56 +156,80 @@ function rr() {
 function spn() {
     // console.log('Dentro de SPN');
 
-    if ((colaCorriendo.length > 0) && (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu)) desasignarCpu();
-
-    // Para no duplicar código no encadeno los if's  como hacía antes
-
-    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
-        let duracionRafagas = [];
-        colaListos.forEach(p => duracionRafagas.push(p.tRafagaCpu));
-        let masCorto = Math.min.apply(null, duracionRafagas);
-        let idx = duracionRafagas.indexOf(masCorto);
-        let procesoACorrer = colaListos.splice(idx, idx+1);
-        colaCorriendo.push(procesoACorrer);
-    }
+    if (
+        (colaCorriendo.length > 0) && 
+        (colaCorriendo[0].tComputoParcialCpu < colaCorriendo[0].tRafagaCpu)
+    ) {
+        ejecutarRafaga();
     //
-    // Sino será tiempo de Cpu desperdiciado
+    } else if (
+        (colaCorriendo.length > 0) && 
+        (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)
+    ) {
+        // Ejecuto TCP si no tiene que ejecutar TFP
+        if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) ejecutarTcp();
+        else ejecutarTfp();
+    } 
+
+    // Caso Cpu libre y procesos en cola listos
+    if (
+        (colaCorriendo.length == 0) &&
+        (colaListos.length > 0)
+    ) {
+        // Asignar Cpu
+        let procesoACorrer = getMasCorto();
+        colaListos = colaListos.filter(p => p.id != procesoACorrer.id);
+        colaCorriendo.push(procesoACorrer);
+        
+        // Caso primera vez que ejecuta
+        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        else spn(); // Vuelvo a entrar para computar uso de Cpu
+    }
+
 }
 
-function srt(procesosMovidos) {
+function srt() {
     // console.log('Dentro de SRT');
 
-    let duracionRafagas = [];
+    // Obtengo el proceso con duración de ráfaga más corta
+    if (colaListos.length > 0) masCorto = getMasCorto(); // Obj Proceso
 
-    if (colaCorriendo.length > 0) {
-        if ((colaCorriendo[0].tComputoParcialCpu < tRafagaCpu) && (procesosMovidos.length > 0)) { // Sino hay procesos movidos, y la ráfaga de cpu todavía no se completó, no hago nada, seguiré ejecutando...
-            procesosMovidos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
-            let masCorta = Math.min.apply(null, duracionRafagas);
-            
-            if ((colaCorriendo[0].tRafagaCpu - colaCorriendo[0].tComputoParcialCpu) > masCorta) {
-                procesoACorrer = colaListos.filter(proceso => proceso.tRafagaCpu == masCorta);
-                let idx = colaListos.indexOf(procesoACorrer);
-                let procesoACorrer = colaListos.splice(idx, idx+1);
-
-                let procesoCorriendo = colaCorriendo.pop(); // Desasigno Cpu, pero entra en cola de listos, por lo que volverá a ejectuar luego.
-                procesoCorriendo.fuePausado = true;
-                colaListos.push(procesoCorriendo);
-
-                colaCorriendo.push(procesoACorrer);
-            }
-        
-        } else if (colaCorriendo[0].tComputoParcialCpu == tRafagaCpu) desasignarCpu();
+    if (
+        (colaCorriendo.length > 0) &&
+        (colaCorriendo[0].tComputoParcialCpu < colaCorriendo[0].tRafagaCpu) && 
+        ((colaCorriendo[0].tRafagaCpu - colaCorriendo[0].tComputoParcialCpu) <= masCorto.tRafagaCpu) 
+    ) ejecutarRafaga(); 
+    //
+    else if (
+        (colaCorriendo.length > 0) && 
+        (colaCorriendo[0].tComputoParcialCpu < colaCorriendo[0].tRafagaCpu) && 
+        ((colaCorriendo[0].tRafagaCpu - colaCorriendo[0].tComputoParcialCpu) > masCorto.tRafagaCpu)
+    ) { 
+        colaCorriendo[0].fuePausado = true;
+        ejecutarTcp();
     }
     //
-    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) { // No hay procesos corriendo y hay procesos en cola. Elijo el de duración de ráfga más corta para que continúe.
-        duracionRafagas = [];
-        colaListos.forEach(proceso => duracionRafagas.push(proceso.tRafagaCpu));
-        let masCorta = Math.min.apply(null, duracionRafagas);
-        let procesoACorrer = colaListos.filter(proceso => proceso.tRafagaCpu == masCorta);
-        let idx = colaListos.indexOf(procesoACorrer);
-        procesoACorrer = colaListos.splice(idx, idx+1);
-        colaCorriendo.push(procesoACorrer);
+    else if (
+        (colaCorriendo.length > 0) &&
+        (colaCorriendo[0].tComputoParcialCpu == colaCorriendo[0].tRafagaCpu)
+    ) {
+        //
+        colaCorriendo[0].fuePausado = false;
+        if (colaCorriendo[0].tComputoTotalES < colaCorriendo[0].tESTotal) ejecutarTcp();
+        else ejecutarTfp();
     }
+
+    // Caso Cpu libre y procesos en cola listos
+    if ((colaCorriendo.length == 0) && (colaListos.length > 0)) {
+        // Asignar Cpu
+        colaListos = colaListos.filter(p => p.id != masCorto.id);
+        colaCorriendo.push(masCorto);
+        
+        // Caso primera vez que ejecuta
+        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        else srt(); // Vuelvo a entrar para computar uso de Cpu
+    }
+
 }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -277,7 +301,7 @@ function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
             spn();
             break;
         case 5: //SRTN (Shortest Remaining Time Next)
-            srt(procesosMovidos);
+            srt();
             break;
         default:
             fcfs();
@@ -290,17 +314,13 @@ function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
 function getMayorPrioridad() {
     let prioridades = colaListos.map(p => p.prioridad);
     let prioritario = colaListos.find(p => p.prioridad == Math.min.apply(null, prioridades));
-    // console.log({prioridades, prioritario}); // Obtiene correctamente el proceso más prioritario
-
-
-    // // creates a new exception type:
-    // function FatalError(){ Error.apply(this, arguments); this.name = "FatalError"; }
-    // FatalError.prototype = Object.create(Error.prototype);
-
-    // // and then, use this to trigger the error:
-    // throw new FatalError("Something went badly wrong!");
-
     return prioritario;
+}
+
+function getMasCorto() {
+    let duracionesRafagas = colaListos.map(p => p.tRafagaCpu);
+    let masCorto = colaListos.find(p => p.tRafagaCpu == Math.min.apply(null, duracionesRafagas));
+    return masCorto;
 }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -459,9 +479,9 @@ function imprimirResultados() {
 /* -------------------------------------------------------------------------------------------- */
 
 function main() {
-    tipoPlanificacion = 3; // Hardcodeado
+    tipoPlanificacion = 5; // Hardcodeado
     while (colaTerminados.length < cantProcesos) {
-    // while (tiempo < 100) {
+    // while (tiempo < 30) {
         console.log({tiempo});
         let movidos = moverProcesosAColaListos();
         ejecutarPlanificacion(tipoPlanificacion, movidos);
