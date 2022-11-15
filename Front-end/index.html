@@ -10,12 +10,33 @@
 </head>
 
 <body>
-    <h2>Prueba tp kevin</h2>
+    <!-- <h2>Prueba tp kevin</h2>
     <form action="http://localhost:3000/upload" enctype="multipart/form-data" method="post">
         <label>File: </label>
             <input type="file" name="archivo" multiple="multiple" /></div>
         <input type="submit" value="Enviar" />
-    </form>
+    </form> -->
+
+
+    <h2>Carga de archivo y elección de planificación</h2>
+    <div>
+        <form action="/upload" enctype="multipart/form-data" method="post">
+            <label>Archivo: </label>
+            <input type="file" name="archivo"/>
+            <br>
+            <label>Planificación: </label>
+            <select name="planificacion">
+                <option value="fcfs">First Come First Served</option>
+                <option value="pe">Prioridad Externa</option>
+                <option value="rr">Round Robin</option>
+                <option value="spn">Shortest Process Next</option>
+                <option value="srt">Shortest Remaining Time</option>
+            </select>
+            <br>
+            <input type="submit" value="Enviar"/>
+        </form>
+    </div>
+
 
     <!-- <input type="file" id="file" />
     <script src="main.js"></script> -->

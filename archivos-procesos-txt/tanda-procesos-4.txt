@@ -9,9 +9,9 @@
 	},
 	{
 		id: 2,
-		tArribo: 1.5,
-		cantRafagas: 20,
-		tRafagaCpu: 4,
+		tArribo: 4,
+		cantRafagas: 2,
+		tRafagaCpu: 20,
 		tRafagaES: 25,
 		prioridad: 1
 	},

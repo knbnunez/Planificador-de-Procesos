@@ -510,7 +510,7 @@ function main() {
         colaTerminados
     };
     const resultadoStr = JSON.stringify(resultado);
-    fs.writeFileSync("../Tandas-procesos/resultado.txt", resultadoStr);
+    fs.writeFileSync("../archivos-procesos-txt/resultado.txt", resultadoStr);
     console.log(resultadoStr);
 }
 
@@ -520,46 +520,46 @@ function main() {
 
 function tratarArchivo(archivo) {
 	// NO BORRAR
-    // const guardadoEn = archivo.filepath;
-	// const contenidoDelArchivo = fs.readFileSync(guardadoEn);
-    // const contenidoDelArchivoString = contenidoDelArchivo.toString()
-    // var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
+    const guardadoEn = archivo.filepath;
+	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
+    const contenidoDelArchivoString = contenidoDelArchivo.toString()
+    var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
     // Data del archivo hardcodeado, descomentar lo de arriba
     
-    var listaProcesos = [ // Considero 
-        {
-            id: 1,
-            tArribo: 0,
-            cantRafagas: 2,
-            tRafagaCpu: 10,
-            tRafagaES: 25,
-            prioridad: 2
-        },
-        {
-            id: 2,
-            tArribo: 4,
-            cantRafagas: 2,
-            tRafagaCpu: 20,
-            tRafagaES: 25,
-            prioridad: 1
-        },
-        {
-            id: 3,
-            tArribo: 8,
-            cantRafagas: 3,
-            tRafagaCpu: 5,
-            tRafagaES: 25,
-            prioridad: 45
-        },
-        {
-            id: 4,
-            tArribo: 10,
-            cantRafagas: 2,
-            tRafagaCpu: 15,
-            tRafagaES: 25,
-            prioridad: 100
-        },
-    ];
+    // var listaProcesos = [
+    //     {
+    //         id: 1,
+    //         tArribo: 0,
+    //         cantRafagas: 2,
+    //         tRafagaCpu: 10,
+    //         tRafagaES: 25,
+    //         prioridad: 2
+    //     },
+    //     {
+    //         id: 2,
+    //         tArribo: 4,
+    //         cantRafagas: 2,
+    //         tRafagaCpu: 20,
+    //         tRafagaES: 25,
+    //         prioridad: 1
+    //     },
+    //     {
+    //         id: 3,
+    //         tArribo: 8,
+    //         cantRafagas: 3,
+    //         tRafagaCpu: 5,
+    //         tRafagaES: 25,
+    //         prioridad: 45
+    //     },
+    //     {
+    //         id: 4,
+    //         tArribo: 10,
+    //         cantRafagas: 2,
+    //         tRafagaCpu: 15,
+    //         tRafagaES: 25,
+    //         prioridad: 100
+    //     },
+    // ];
     // console.log(listaDeProcesos);
     listaProcesos.forEach(p => {
         const objAux = new Proceso(

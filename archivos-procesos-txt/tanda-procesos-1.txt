@@ -33,26 +33,10 @@
 	},
 	{
 		id: 5,
-		tArribo: 2,
-		cantRafagas: 2,
-		tRafagaCpu: 3,
-		tRafagaES: 5,
-		prioridad: 80
-	},
-	{
-		id: 6,
-		tArribo: 3,
-		cantRafagas: 4,
-		tRafagaCpu: 6,
-		tRafagaES: 4,
-		prioridad: 1
-	},
-	{
-		id: 7,
-		tArribo: 0,
+		tArribo: 10,
 		cantRafagas: 1,
-		tRafagaCpu: 10,
-		tRafagaES: 6,
-		prioridad: 50
-	}
+		tRafagaCpu: 15,
+		tRafagaES: 9,
+		prioridad: 101
+	},
 ]
