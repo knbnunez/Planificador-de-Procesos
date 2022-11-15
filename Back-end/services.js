@@ -28,7 +28,7 @@ let tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
 //
 let quantum = 5;        // Lo ingresa el usuario
 //
-let tipoPlanificacion = 0; // Hardcodeado
+let tipoPlanificacion = 'fcfs'; // Default
 
 // Funciones de planificación
 function fcfs() {
@@ -58,8 +58,8 @@ function fcfs() {
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
         
-        // Caso primera vez que ejecuta
-        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        // Caso primera vez que ejecuta Cpu
+        if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
         else fcfs(); // Vuelvo a entrar para computar uso de Cpu
     }
     
@@ -103,8 +103,8 @@ function pe() {
         colaListos = colaListos.filter(p => p.id != masPrioritarioColaListos.id);
         colaCorriendo.push(masPrioritarioColaListos);
         
-        // Caso primera vez que ejecuta
-        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        // Caso primera vez que ejecuta Cpu
+        if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
         else pe(); // Vuelvo a entrar para computar uso de Cpu
     }
 
@@ -145,8 +145,8 @@ function rr() {
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
         
-        // Caso primera vez que ejecuta
-        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        // Caso primera vez que ejecuta Cpu
+        if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
         else rr();
     }
 
@@ -181,8 +181,8 @@ function spn() {
         colaListos = colaListos.filter(p => p.id != procesoACorrer.id);
         colaCorriendo.push(procesoACorrer);
         
-        // Caso primera vez que ejecuta
-        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        // Caso primera vez que ejecuta Cpu
+        if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
         else spn(); // Vuelvo a entrar para computar uso de Cpu
     }
 
@@ -226,7 +226,7 @@ function srt() {
         colaCorriendo.push(masCorto);
         
         // Caso primera vez que ejecuta
-        if ((tip > 0) && (colaCorriendo[0].tComputoTotalCpu == 0)) ejecutarTip();
+        if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
         else srt(); // Vuelvo a entrar para computar uso de Cpu
     }
 
@@ -287,20 +287,20 @@ function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
     }
     
     switch (tipoPlanificacion) {
-        case 1: //FCFS (First Come First Served)
+        case 'fcfs': //FCFS (First Come First Served)
             fcfs();
             break;
-        case 2: //Prioridad Externa   
+        case 'pe': //Prioridad Externa   
             pe();                
             break;
-        case 3: //Round-Robin
+        case 'rr': //Round-Robin
             if (quantum > 0) rr();
             else fcfs();
             break;
-        case 4: //SPN (Shortest Process Next)
+        case 'spn': //SPN (Shortest Process Next)
             spn();
             break;
-        case 5: //SRTN (Shortest Remaining Time Next)
+        case 'srt': //SRTN (Shortest Remaining Time Next)
             srt();
             break;
         default:
@@ -328,7 +328,7 @@ function getMasCorto() {
 function ejecutarRafaga() {
     console.log('Usando CPU... P'+colaCorriendo[0].id);
     
-    if (tipoPlanificacion != 3) {
+    if (tipoPlanificacion != 'rr') {
         colaCorriendo[0].tComputoParcialCpu += 1;
         tUsoCpu += 1;
     //
@@ -362,7 +362,7 @@ function ejecutarTcp() {
         procesoDesasignado.tComputoTcp = 0;
         
         if (!procesoDesasignado.fuePausado) {
-            if (tipoPlanificacion != 3) procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoParcialCpu;
+            if (tipoPlanificacion != 'rr') procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoParcialCpu;
             else procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoQuantum; // Caso rr
            
             procesoDesasignado.tComputoParcialCpu = 0; 
@@ -372,7 +372,7 @@ function ejecutarTcp() {
             console.log('Finalizó el TCP, ingresó a cola de Bloqueados: P'+procesoDesasignado.id);
         //
         } else { // Caso planificaciones pe, rr, srt (las preemptivas)
-            if (tipoPlanificacion == 3) procesoDesasignado.tComputoParcialCpu = 0; // Sólo tiene sentido en rr 
+            if (tipoPlanificacion == 'rr') procesoDesasignado.tComputoParcialCpu = 0; // Sólo tiene sentido en rr 
             colaListos.push(procesoDesasignado);
             console.log('Finalizó el TCP, ingresó a cola de Listos porque fue Pausado, no se resetean los computos: P'+procesoDesasignado.id);
         }
@@ -479,7 +479,7 @@ function imprimirResultados() {
 /* -------------------------------------------------------------------------------------------- */
 
 function main() {
-    tipoPlanificacion = 5; // Hardcodeado
+    tipoPlanificacion = 'srt'; // Hardcodeado
     while (colaTerminados.length < cantProcesos) {
     // while (tiempo < 30) {
         console.log({tiempo});
