@@ -286,6 +286,8 @@ function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
         return
     }
     
+    console.log(tipoPlanificacion);
+
     switch (tipoPlanificacion) {
         case 'fcfs': //FCFS (First Come First Served)
             fcfs();
@@ -429,6 +431,7 @@ function imprimirResultados() {
     // Luego pasar todo a html con varios a idElemento.innerHTML += ...
     
     console.log({
+        msg0: `Planificacion ${tipoPlanificacion}`,
         msg1: `Tiempo de finalización ${tiempo}`,
         msg2: `Tiempo de CPU ${tUsoCpu}`,
         msg3: `Tiempo de SO ${tUsoSo}`,
@@ -479,9 +482,7 @@ function imprimirResultados() {
 /* -------------------------------------------------------------------------------------------- */
 
 function main() {
-    tipoPlanificacion = 'srt'; // Hardcodeado
     while (colaTerminados.length < cantProcesos) {
-    // while (tiempo < 30) {
         console.log({tiempo});
         let movidos = moverProcesosAColaListos();
         ejecutarPlanificacion(tipoPlanificacion, movidos);
@@ -518,7 +519,7 @@ function main() {
 
 // Desencadenador
 
-function tratarArchivo(archivo) {
+function tratarArchivo(planificacion, archivo) {
 	// NO BORRAR
     const guardadoEn = archivo.filepath;
 	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
@@ -574,10 +575,13 @@ function tratarArchivo(archivo) {
         cantProcesos += 1;
     });
 
-    planificaciones.func1('Hola');
-    planificaciones.func2(colaNuevos);
-    console.log(colaNuevos); // No lo modifica... es pasado por valor, no por referencia al objeto
+    // planificaciones.func1('Hola');
+    // planificaciones.func2(colaNuevos);
+    // console.log(colaNuevos); // No lo modifica... es pasado por valor, no por referencia al objeto
 
+    tipoPlanificacion = planificacion;
+    console.log(planificacion);
+    // console.log(typeof(planificacion));
     main();
     colaNuevos = [];
     cantProcesos = 0;

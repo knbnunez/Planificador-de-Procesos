@@ -23,16 +23,17 @@ router.get('/', (request, response) => {
 
 // Endpoint para recibir archivos
 router.post('/upload', (request, response, next) => {
-	const form = formidable();
+	const form = formidable({ multiples: true });
     // Busca los archivos y la planificación seleccionada enviados en el formulario
     form.parse(request, (err, fields, files) => {
         if (err) {
           next(err);
           return;
         }
-        // console.log(files);
+        // console.log('Files:',files);
+        // console.log('Fields:',fields);
         if (files.archivo) {
-            tratarArchivo(files.archivo);
+            tratarArchivo(fields.planificacion, files.archivo);
         }
     });
     response.send('POST REQUEST: enviaste un archivo');
