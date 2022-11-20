@@ -1,0 +1,80 @@
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap v5.2.2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    
+    <!-- Mis estilos -->
+    <link rel="stylesheet" href="./styles.css">
+
+    <title>Planificador de Procesos</title>
+</head>
+
+<body>
+
+    <!-- <div>
+        <form action="/upload" enctype="multipart/form-data" method="post">
+            <label>Archivo: </label>
+            <input type="file" name="archivo"/>
+            <br>
+            <label>Planificación: </label>
+            <select name="planificacion">
+                <option value="fcfs">First Come First Served</option>
+                <option value="pe">Prioridad Externa</option>
+                <option value="rr">Round Robin</option>
+                <option value="spn">Shortest Process Next</option>
+                <option value="srt">Shortest Remaining Time</option>
+            </select>
+            <br>
+            <input type="submit" value="Enviar"/>
+        </form>
+    </div> -->
+
+    <div class="container h-100 d-flex align-items-center justify-content-center">
+        <div class="row">
+            <div class="card p-3 mb-2 bg-dark text-white">
+                <div class="card-header">
+                    <h2>Planificador de Procesos</h2>
+                </div>
+
+                <div class="card-body mt-3">
+                    <form action="/upload" enctype="multipart/form-data" method="post" id="inputForm">
+                        <!-- Input Archivo -->
+                        <div class="row p-2">
+                            <label>Archivo </label>
+                            <input type="file" class="form-control" name="archivo"/>
+                        </div>
+                        
+                        <!-- Input Drop-Down-List -->
+                        <div class="row p-2">
+                            <label>Planificación </label>
+                            <select class="form-select" name="planificacion">
+                                <option selected>Seleccione un tipo de planificación...</option>
+                                <option value="fcfs">First Come First Served</option>
+                                <option value="pe">Prioridad Externa</option>
+                                <option value="rr">Round Robin</option>
+                                <option value="spn">Shortest Process Next</option>
+                                <option value="srt">Shortest Remaining Time</option>
+                            </select>    
+                        </div>
+                        
+                        <!-- Botón Enviar -->
+                        <div class="row mt-4 w-50 justify-content-center" style="
+                        margin-left: 100px;">
+                            <input type="submit" class="btn btn-secondary" onclick="" value="Enviar"/>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts.js"></script>
+
+</body>
+
+</html>

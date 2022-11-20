@@ -427,8 +427,45 @@ function terminarCiclo() {
 
 /* -------------------------------------------------------------------------------------------- */
 
-function imprimirResultados() {
+function main() {
+    while (colaTerminados.length < cantProcesos) {
+        console.log({tiempo});
+        let movidos = moverProcesosAColaListos();
+        ejecutarPlanificacion(tipoPlanificacion, movidos);
+        terminarCiclo();
+        console.log('-----------------------');
+    }
+    
+
+    // Finalizando imprimo
+    // resultados();    
+
+    // Generación de archivo
+    const resultado = {
+        colaNuevos,
+        colaListos,
+        colaCorriendo,
+        colaBloqueados,
+        colaTerminados
+    };
+
+    console.log({resultado});
+
+    const resultadoStr = JSON.stringify(resultado);
+    fs.writeFileSync("../archivos-procesos-txt/resultado.txt", resultadoStr);
+    console.log(resultadoStr);
+}
+
+
+/* -------------------------------------------------------------------------------------------- */
+
+function resultados() {
     // Luego pasar todo a html con varios a idElemento.innerHTML += ...
+
+    // O return y ver cómo mostrarlos desde el html
+
+    // O podría también meter todo en forma de html dentro de una variable y luego enviarla para que se renderice. No es la mejor opción para mí...
+    
     
     console.log({
         msg0: `Planificacion ${tipoPlanificacion}`,
@@ -438,6 +475,7 @@ function imprimirResultados() {
         msg4: `Tiempo de CPU desocupada ${tCpuDesocupada}`
     });
 
+    // El recorrido debería hacerlo en el Frontend
     colaTerminados.forEach(p => {
         console.log({
             msg1: `Para ${p.id}:`,
@@ -446,6 +484,12 @@ function imprimirResultados() {
             msg4: `Tiempo en Estado de Listo ${p.tEspera}`
         });
     });
+
+
+
+    // PARTE FOR EACH, DEBERÍA SER RECORRIDA DESDE EL FRONT UNA VEZ RECIBIDO EL JSON CON ARREGLOS
+
+    // --------------------------------------------
     
     let total = 0;
     for(let i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno;
@@ -464,6 +508,8 @@ function imprimirResultados() {
         // msg: `- Porcentual = ${tUsoCpu}`
     });
     
+
+    // El recorrido debería hacerlo en el Frontend
     colaTerminados.forEach(p => {
         console.log({
             msg1: `Absolutos:`,
@@ -476,43 +522,34 @@ function imprimirResultados() {
             msg2: `Para ${p.id}: ${Math.round((p.tComputoTotalCpu * 100)/tUsoCpu)}`,
         });
     });
+    // ------------------------------------------
+
+
+
+
+
+
+    return [
+        {
+            msg0: `Planificacion ${tipoPlanificacion}`,
+            msg1: `Tiempo de finalización ${tiempo}`,
+            msg2: `Tiempo de CPU ${tUsoCpu}`,
+            msg3: `Tiempo de SO ${tUsoSo}`,
+            msg4: `Tiempo de CPU desocupada ${tCpuDesocupada}`
+        },
+        colaTerminados,
+        {
+            msg1: `Para la tanda de procesos:`,
+            msg2: `Tiempo de Retorno ${tiempo}`,
+            msg3: `Tiempo Medio de Retorno ${avg}`
+        },
+        {
+            msg1: `Tiempos de CPU desocupada ${tCpuDesocupada}`,
+            msg2: `Tiempo de CPU utilizada por el SO ${tUsoSo}`,
+            msg3: `Tiempo de CPU utlizada por los procesos:`,
+        },
+    ]
         
-}
-
-/* -------------------------------------------------------------------------------------------- */
-
-function main() {
-    while (colaTerminados.length < cantProcesos) {
-        console.log({tiempo});
-        let movidos = moverProcesosAColaListos();
-        ejecutarPlanificacion(tipoPlanificacion, movidos);
-        terminarCiclo();
-        console.log('-----------------------');
-    }
-    
-
-    // Finalizando imprimo
-    console.log({
-        colaNuevos, 
-        colaListos, 
-
-        colaCorriendo, 
-        colaBloqueados,
-        colaTerminados
-    });
-    imprimirResultados();    
-
-    // Generación de archivo
-    const resultado = {
-        colaNuevos,
-        colaListos,
-        colaCorriendo,
-        colaBloqueados,
-        colaTerminados
-    };
-    const resultadoStr = JSON.stringify(resultado);
-    fs.writeFileSync("../archivos-procesos-txt/resultado.txt", resultadoStr);
-    console.log(resultadoStr);
 }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -520,48 +557,11 @@ function main() {
 // Desencadenador
 
 function tratarArchivo(planificacion, archivo) {
-	// NO BORRAR
     const guardadoEn = archivo.filepath;
 	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
     const contenidoDelArchivoString = contenidoDelArchivo.toString()
     var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
-    // Data del archivo hardcodeado, descomentar lo de arriba
     
-    // var listaProcesos = [
-    //     {
-    //         id: 1,
-    //         tArribo: 0,
-    //         cantRafagas: 2,
-    //         tRafagaCpu: 10,
-    //         tRafagaES: 25,
-    //         prioridad: 2
-    //     },
-    //     {
-    //         id: 2,
-    //         tArribo: 4,
-    //         cantRafagas: 2,
-    //         tRafagaCpu: 20,
-    //         tRafagaES: 25,
-    //         prioridad: 1
-    //     },
-    //     {
-    //         id: 3,
-    //         tArribo: 8,
-    //         cantRafagas: 3,
-    //         tRafagaCpu: 5,
-    //         tRafagaES: 25,
-    //         prioridad: 45
-    //     },
-    //     {
-    //         id: 4,
-    //         tArribo: 10,
-    //         cantRafagas: 2,
-    //         tRafagaCpu: 15,
-    //         tRafagaES: 25,
-    //         prioridad: 100
-    //     },
-    // ];
-    // console.log(listaDeProcesos);
     listaProcesos.forEach(p => {
         const objAux = new Proceso(
             p.id, 
@@ -579,12 +579,22 @@ function tratarArchivo(planificacion, archivo) {
     // planificaciones.func2(colaNuevos);
     // console.log(colaNuevos); // No lo modifica... es pasado por valor, no por referencia al objeto
 
+    // ¡¡¡A SOLUCIONAR!!!
+    // Si no se reinicia el servidor, no cambia la política de planificación... No comprendo por qué...
+    // https://es.stackoverflow.com/questions/41771/como-reiniciar-un-proceso-con-nodejs
+
+
     tipoPlanificacion = planificacion;
     console.log(planificacion);
     // console.log(typeof(planificacion));
+    
     main();
+    
     colaNuevos = [];
     cantProcesos = 0;
+    tipoPlanificacion = 'fcfs';
+
+    return resultados();
 }
 
 module.exports = tratarArchivo;
