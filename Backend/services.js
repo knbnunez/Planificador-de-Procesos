@@ -29,6 +29,8 @@ let tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
 let quantum = 5;        // Lo ingresa el usuario
 //
 let tipoPlanificacion = 'fcfs'; // Default
+//
+let eventos = [];
 
 // Funciones de planificación
 function fcfs() {
@@ -57,6 +59,7 @@ function fcfs() {
         // Asignar Cpu
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
+        simulaciones('P['+colaCorriendo[0].id+'] Se le asignó la CPU');
         
         // Caso primera vez que ejecuta Cpu
         if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
@@ -102,6 +105,7 @@ function pe() {
         // Asignar Cpu
         colaListos = colaListos.filter(p => p.id != masPrioritarioColaListos.id);
         colaCorriendo.push(masPrioritarioColaListos);
+        simulaciones('P['+colaCorriendo[0].id+'] Se le asignó la CPU');
         
         // Caso primera vez que ejecuta Cpu
         if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
@@ -144,6 +148,7 @@ function rr() {
         // Asignar Cpu
         let procesoACorrer = colaListos.shift();
         colaCorriendo.push(procesoACorrer);
+        simulaciones('P['+colaCorriendo[0].id+'] Se le asignó la CPU');
         
         // Caso primera vez que ejecuta Cpu
         if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
@@ -180,6 +185,7 @@ function spn() {
         let procesoACorrer = getMasCorto();
         colaListos = colaListos.filter(p => p.id != procesoACorrer.id);
         colaCorriendo.push(procesoACorrer);
+        simulaciones('P['+colaCorriendo[0].id+'] Se le asignó la CPU');
         
         // Caso primera vez que ejecuta Cpu
         if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
@@ -224,6 +230,7 @@ function srt() {
         // Asignar Cpu
         colaListos = colaListos.filter(p => p.id != masCorto.id);
         colaCorriendo.push(masCorto);
+        simulaciones('P['+colaCorriendo[0].id+'] Se le asignó la CPU');
         
         // Caso primera vez que ejecuta
         if ((tip > 0) && (colaCorriendo[0].tComputoTip < tip)) ejecutarTip();
@@ -270,7 +277,8 @@ function moverProcesosAColaListos() {
     // Concatenación de ambos resultados
     if ((nuevosAMover.length > 0) || (bloqueadosAMover.length > 0)) {
         procesosAMover = procesosAMover.concat(nuevosAMover, bloqueadosAMover);
-        if (procesosAMover.length > 0) procesosAMover.forEach((p) => console.log('Moviendo procesos a cola de listos P'+p.id));
+        // if (procesosAMover.length > 0) procesosAMover.forEach((p) => console.log('Moviendo procesos a cola de listos P'+p.id));
+        procesosAMover.forEach(p => simulaciones('P['+p.id+'] Ingresó a Cola de Listos'));
         colaListos = colaListos.concat(procesosAMover);
     }
 
@@ -286,7 +294,7 @@ function ejecutarPlanificacion(tipoPlanificacion, procesosMovidos) {
         return
     }
     
-    console.log(tipoPlanificacion);
+    // console.log(tipoPlanificacion);
 
     switch (tipoPlanificacion) {
         case 'fcfs': //FCFS (First Come First Served)
@@ -328,8 +336,9 @@ function getMasCorto() {
 /* -------------------------------------------------------------------------------------------- */
 
 function ejecutarRafaga() {
-    console.log('Usando CPU... P'+colaCorriendo[0].id);
-    
+    // console.log('Usando CPU... P'+colaCorriendo[0].id);
+    if (colaCorriendo[0].tComputoParcialCpu == 0) simulaciones('P['+colaCorriendo[0].id+'] Comenzó a ejecutar ráfaga de CPU');
+
     if (tipoPlanificacion != 'rr') {
         colaCorriendo[0].tComputoParcialCpu += 1;
         tUsoCpu += 1;
@@ -345,23 +354,29 @@ function ejecutarRafaga() {
 
 function ejecutarTip() {
     // console.log("Entré al if");
+    if (colaCorriendo[0].tComputoTip == 0) simulaciones('P['+colaCorriendo[0].id+'] El SO comenzó a ejecutar su TIP');
+
     colaCorriendo[0].tComputoTip += 1;
     tUsoSo += 1;
-    console.log('TIP aplicando a P'+colaCorriendo[0].id);
+    // console.log('TIP aplicando a P'+colaCorriendo[0].id);
     
-    if (colaCorriendo[0].tComputoTip == tip) console.log('TIP En el próximo turno comenzará a hacer uso de CPU P'+colaCorriendo[0].id);
+    // if (colaCorriendo[0].tComputoTip == tip) console.log('TIP En el próximo turno comenzará a hacer uso de CPU P'+colaCorriendo[0].id);
+    if (colaCorriendo[0].tComputoTip == tip) simulaciones('P['+colaCorriendo[0].id+'] El SO terminó de ejecutar su TIP');
 }
 
 function ejecutarTcp() {
+    if (colaCorriendo[0].tComputoTcp == 0) simulaciones('P['+colaCorriendo[0].id+'] El SO comenzó a ejecutar su TCP');
 
     if ((colaCorriendo[0].tComputoTcp < tcp) && (tcp > 0)) {
-        console.log('Ejecutando TCP... P'+colaCorriendo[0].id);
+        // console.log('Ejecutando TCP... P'+colaCorriendo[0].id);
         colaCorriendo[0].tComputoTcp += 1;
         tUsoSo += 1;
     //
     } else {
+        simulaciones('P['+colaCorriendo[0].id+'] El SO terminó de ejecutar su TCP');
         let procesoDesasignado = desasignarCpu();
         procesoDesasignado.tComputoTcp = 0;
+        
         
         if (!procesoDesasignado.fuePausado) {
             if (tipoPlanificacion != 'rr') procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoParcialCpu;
@@ -371,32 +386,39 @@ function ejecutarTcp() {
             procesoDesasignado.tComputoQuantum = 0; // Sólo tiene sentido en rr
 
             colaBloqueados.push(procesoDesasignado);
-            console.log('Finalizó el TCP, ingresó a cola de Bloqueados: P'+procesoDesasignado.id);
+            // console.log('Finalizó el TCP, ingresó a cola de Bloqueados: P'+procesoDesasignado.id);
+            simulaciones('P['+procesoDesasignado.id+'] Ingresó a Cola de Bloqueados');
         //
         } else { // Caso planificaciones pe, rr, srt (las preemptivas)
             if (tipoPlanificacion == 'rr') procesoDesasignado.tComputoParcialCpu = 0; // Sólo tiene sentido en rr 
             colaListos.push(procesoDesasignado);
-            console.log('Finalizó el TCP, ingresó a cola de Listos porque fue Pausado, no se resetean los computos: P'+procesoDesasignado.id);
+            // console.log('Finalizó el TCP, ingresó a cola de Listos porque fue Pausado, no se resetean los computos: P'+procesoDesasignado.id);
+            simulaciones('P['+procesoDesasignado.id+'] Ingresó a Cola de Listos (por Preemptive)');
         }
         
     }
 }
 
 function ejecutarTfp() {
+    if (colaCorriendo[0].tComputoTfp == 0) simulaciones('P['+colaCorriendo[0].id+'] El SO comenzó a ejecutar su TFP');
+    
     // Sumo cómputo de TFP hasta que sea = a TFP (total), luego entra a cola de terminados 
     if ((colaCorriendo[0].tComputoTfp < tfp) && (tfp > 0)) {
-        console.log('Ejecutando TFP... P'+colaCorriendo[0].id);
+        // console.log('Ejecutando TFP... P'+colaCorriendo[0].id);
         colaCorriendo[0].tComputoTfp += 1;
         tUsoSo += 1; 
 
     } else {
+        simulaciones('P['+colaCorriendo[0].id+'] El SO terminó de ejecutar su TFP');
         let procesoDesasignado = desasignarCpu();
         procesoDesasignado.tComputoTotalCpu += procesoDesasignado.tComputoParcialCpu;
         procesoDesasignado.tComputoParcialCpu = 0;
         procesoDesasignado.tRetorno = tiempo;
+        
 
         colaTerminados.push(procesoDesasignado);
-        console.log('Finalizó el TFP, ingresó a la cola de TERMINADOS P'+procesoDesasignado.id);
+        // console.log('Finalizó el TFP, ingresó a la cola de TERMINADOS P'+procesoDesasignado.id);
+        simulaciones('P['+procesoDesasignado.id+'] Ingresó a Cola de Terminados');
     }  
 }
 
@@ -407,7 +429,8 @@ function ejecutarTfp() {
 function desasignarCpu() {
     let procesoADesasignar = colaCorriendo.pop();
     // colaBloqueados.push(procesoADesasignar);
-    console.log('Abandonando CPU... P'+procesoADesasignar.id);    
+    // console.log('Abandonando CPU... P'+procesoADesasignar.id);    
+    simulaciones('P['+procesoADesasignar.id+'] Se le desasignó la CPU');
     return procesoADesasignar;
 }
 
@@ -429,44 +452,81 @@ function terminarCiclo() {
 
 function main() {
     while (colaTerminados.length < cantProcesos) {
-        console.log({tiempo});
+        // console.log({tiempo});
         let movidos = moverProcesosAColaListos();
         ejecutarPlanificacion(tipoPlanificacion, movidos);
         terminarCiclo();
-        console.log('-----------------------');
+        // console.log('-----------------------');
     }
     
-
     // Finalizando imprimo
     // resultados();    
 
     // Generación de archivo
-    const resultado = {
-        colaNuevos,
-        colaListos,
-        colaCorriendo,
-        colaBloqueados,
-        colaTerminados
-    };
-
-    console.log({resultado});
-
-    const resultadoStr = JSON.stringify(resultado);
-    fs.writeFileSync("../archivos-procesos-txt/resultado.txt", resultadoStr);
-    console.log(resultadoStr);
+    // const resultado = {
+    //     colaNuevos,
+    //     colaListos,
+    //     colaCorriendo,
+    //     colaBloqueados,
+    //     colaTerminados
+    // };
+    // console.log({resultado});
+    // const resultadoStr = JSON.stringify(resultado);
+    // fs.writeFileSync("../archivos-procesos-txt/resultado.txt", resultadoStr);
+    // console.log(resultadoStr);
 }
 
 
 /* -------------------------------------------------------------------------------------------- */
 
-function resultados() {
-    // Luego pasar todo a html con varios a idElemento.innerHTML += ...
+function simulaciones(evento) {
+    eventos[tiempo] += evento; // El índice es = instante de tiempo de ejecución [tener en cuenta para el recorrido en el Front...]
+}
 
-    // O return y ver cómo mostrarlos desde el html
+function getEventos() {
+    eventos = [
+        'Hola',
+        'Chau'
+    ];
+    return eventos;
+}
 
-    // O podría también meter todo en forma de html dentro de una variable y luego enviarla para que se renderice. No es la mejor opción para mí...
+function getResultados() {
+    // Para cada Proceso
+    let tRetornoProcesos = colaTerminados.map(p => p.tRetorno);
+    let tRetornoNormalizados = colaTerminados.map(p => (p.tRetorno - p.tEspera));
+    let tEstadoListos = colaTerminados.map(p => p.tEspera);
     
+    // Para la Tanda
+    let tRetorno = tiempo;
+
+    let total = 0;
+    for (let i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno;
     
+    let tMedioRetorno = (total / colaTerminados.length);
+    
+    // Para el uso de la CPU
+    // tCpuDesocupada
+    // tUsoSo
+    let tAbsolutos = colaTerminados.map(p => p.tComputoTotalCpu);
+    let tPorcentuales = colaTerminados.map(p => Math.round((p.tComputoTotalCpu * 100)/tUsoCpu));
+    
+    // return {
+    //     tRetornoProcesos,
+    //     tRetornoNormalizados,
+    //     tEstadoListos,
+    //     tRetorno, 
+    //     tMedioRetorno, 
+    //     tCpuDesocupada,
+    //     tUsoSo,
+    //     tAbsolutos,
+    //     tPorcentuales
+    // };
+
+    return [
+        'Soy resultado'
+    ]
+
     console.log({
         msg0: `Planificacion ${tipoPlanificacion}`,
         msg1: `Tiempo de finalización ${tiempo}`,
@@ -491,7 +551,7 @@ function resultados() {
 
     // --------------------------------------------
     
-    let total = 0;
+    // let total = 0;
     for(let i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno;
     let avg = total / colaTerminados.length;
     console.log({
@@ -525,10 +585,6 @@ function resultados() {
     // ------------------------------------------
 
 
-
-
-
-
     return [
         {
             msg0: `Planificacion ${tipoPlanificacion}`,
@@ -552,11 +608,10 @@ function resultados() {
         
 }
 
+
 /* -------------------------------------------------------------------------------------------- */
 
-// Desencadenador
-
-function tratarArchivo(planificacion, archivo) {
+function tratarInputs(planificacion, tip, tcp, tfp, quantum, archivo) {
     const guardadoEn = archivo.filepath;
 	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
     const contenidoDelArchivoString = contenidoDelArchivo.toString()
@@ -572,9 +627,17 @@ function tratarArchivo(planificacion, archivo) {
             p.prioridad
         );
         colaNuevos.push(objAux);
+        simulaciones('P['+p.id+'] Ingresó a Cola de Nuevos');
         cantProcesos += 1;
     });
 
+    this.tipoPlanificacion = planificacion;
+    this.tip = tip; // Si no funciona el this, cambiar el nombre de los parámetros que recibe la función
+    this.tcp = tcp;
+    this.tfp = tfp;
+    this.quantum = quantum;
+    
+    
     // planificaciones.func1('Hola');
     // planificaciones.func2(colaNuevos);
     // console.log(colaNuevos); // No lo modifica... es pasado por valor, no por referencia al objeto
@@ -583,18 +646,25 @@ function tratarArchivo(planificacion, archivo) {
     // Si no se reinicia el servidor, no cambia la política de planificación... No comprendo por qué...
     // https://es.stackoverflow.com/questions/41771/como-reiniciar-un-proceso-con-nodejs
 
-
-    tipoPlanificacion = planificacion;
-    console.log(planificacion);
-    // console.log(typeof(planificacion));
     
     main();
     
+    // Reseteo valores
     colaNuevos = [];
     cantProcesos = 0;
     tipoPlanificacion = 'fcfs';
-
-    return resultados();
+    this.tip = 0;
+    this.tcp = 0;
+    this.tfp = 0;
+    this.quantum = 0;
 }
 
-module.exports = tratarArchivo;
+// module.exports = tratarInputs;
+// module.exports = getEventos;
+// module.exports = getResultados;
+
+module.exports = {
+    tratarInputs: tratarInputs,
+    getEventos: getEventos,
+    getResultados: getResultados
+}

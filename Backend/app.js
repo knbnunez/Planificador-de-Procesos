@@ -1,9 +1,11 @@
-// // IMPORTS
-const express = require('express'); // Importo express
+const express = require('express');
 const router = require('./controllers.js');
+var cors = require('cors');
 
 const app = express(); // Creo una instacnia de express
 const port = 3000;
+
+app.use(cors()); // Enable CORS
 
 // Las consultas se harán a partir de ésta ruta /uno, /dos, /...
 app.use('/', router);

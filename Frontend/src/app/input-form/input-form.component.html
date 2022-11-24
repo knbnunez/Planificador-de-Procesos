@@ -1,0 +1,44 @@
+<div class="container-fluid d-flex align-items-center justify-content-center">
+    <div class="row">
+        
+        <div class="card p-3 mb-2 bg-dark text-white">
+            
+            <div class="card-header">
+                <h2>Planificador de Procesos</h2>
+            </div>
+
+            <div class="card-body mt-3">
+                
+                <!-- Ver angular forms -->
+                <form action="/upload" enctype="multipart/form-data" method="post" id="inputForm">
+                    <!-- Input Archivo -->
+                    <div class="row p-2">
+                        <label>Archivo </label>
+                        <input type="file" class="form-control" name="archivo"/>
+                    </div>
+                    
+                    <!-- Input Drop-Down-List -->
+                    <div class="row p-2">
+                        <label>Planificación </label>
+                        <select class="form-select" name="planificacion">
+                            <option selected>Seleccione un tipo de planificación...</option>
+                            <option value="fcfs">First Come First Served</option>
+                            <option value="pe">Prioridad Externa</option>
+                            <option value="rr">Round Robin</option>
+                            <option value="spn">Shortest Process Next</option>
+                            <option value="srt">Shortest Remaining Time</option>
+                        </select>    
+                    </div>
+                    
+                    <!-- Botón Enviar -->
+                    <div class="row mt-4 w-50 justify-content-center" style="
+                    margin-left: 100px;">
+                        <input type="submit" class="btn btn-secondary" routerlink="/resultados" value="Enviar"/>
+                    </div>
+
+                </form>
+            </div>
+        </div>  
+        
+    </div>
+</div>

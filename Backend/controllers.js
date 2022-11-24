@@ -4,53 +4,48 @@
 const express = require('express'); 
 const formidable = require('formidable');
 const fs = require('fs');
-const tratarArchivo = require('./services');
 const parse = require('form-parse');
+
+// Funciones mías
+// const tratarInputs = require('./services');
+// const getEventos = require('./services');
+// const getResultados = require('./services');
+const services = require('./services');
+
 //
 var path = require('path');
-//
 
 let router = express.Router();
 
-// Endpoint para subir archivos
-router.get('/', (request, response) => {
-    response.sendFile(path.resolve(__dirname+'/../Frontend/index.html'));
-    // path.resolve resuelve la ruta del archivo antes de ser usado. Si tratamos de usarlo sin path.resolve puede ser considerado como un archivo malicioso y termina tirando error
-    // __dirname nos da la ruta de la carpeta donde está el proyecto
-});
-
-
-
 // Endpoint para recibir archivos
-router.post('/upload', (request, response, next) => {
+router.post('/cargas', (request, response, next) => {
 	const form = formidable({ multiples: true });
+    
     // Busca los archivos y la planificación seleccionada enviados en el formulario
     form.parse(request, (err, fields, files) => {
         if (err) {
           next(err);
           return;
         }
-        // console.log('Files:',files);
-        // console.log('Fields:',fields);
-        if (files.archivo) {
-            response.send(tratarArchivo(fields.planificacion, files.archivo)); // Devuelvo un array de objetos y datos útiles para mostrar desde el Front
-        }
+        
+        if (files.archivo) services.tratarInputs(fields.planificacion,
+                                        fields.valorTip, // Falta agregar estos campos en el formulario del Front
+                                        fields.valorTcp, // ...
+                                        fields.valorTfp, // ...
+                                        fields.quantum,  // ...
+                                        files.archivo);
     });
-    
-    // response.send('POST REQUEST: enviaste un archivo');
-    // response.sendFile(path.resolve(__dirname+'/../Frontend/result.html'));
+
 });
 
+// Bitácora de smulación
+router.get('/eventos', (request, response) => {
+    response.send(services.getEventos()); // return json
+});
 
-
-router.get('/result', (request, response) => {
-	response.download('../archivos-procesos-txt/resultado.txt', (err) => {
-        if (err) {
-            next(err);
-            return;
-        }
-    });
-    response.sendFile(__dirname+'/../archivos-procesos-txt/resultado.txt');
+// Resultados finales pedidos
+router.get('/resultados', (request, response) => {
+    response.send(services.getResultados()); // return json
 });
 
 
