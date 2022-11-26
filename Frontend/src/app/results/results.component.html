@@ -1,5 +1,137 @@
-<p>results works!</p>
-<table>
-    <tr *ngFor="let i of items">{{ i }}</tr>
+<!-- <div class="container">
+    <div class="row">
+        <ul class="list-group">
+            
+            <li class="list-group-item" *ngFor="let e of eventos">{{ e }}</li>
+        </ul>
+    </div>
+</div> -->
+
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Tiempo</th>
+                <th scope="col">Evento</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let evento of eventos; let i = index;">
+                <th>{{ i }}</th>
+                <!-- <td *ngFor="let e of eventos.e">{{ e }}</td> -->
+                <td>
+                    <p *ngFor="let e of eventos[i]">{{ e }}</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     
-</table>
+    <!-- Tiempo retorno -->
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Tiempo de Retorno para cada Proceso</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let p of resultados[0]">
+                <th>P({{ p.Pid }})</th>
+                <td>{{ p.tRetorno }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Tiempo Normalizado -->
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Tiempo de Retorno Normalizado para cada Proceso</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let p of resultados[1]">
+                <th>P({{ p.Pid }})</th>
+                <td>{{ p.tRetornoNormal }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Tiempo en estado de listos -->
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Tiempo en Estado de Listos</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let p of resultados[2]">
+                <th>P({{ p.Pid }})</th>
+                <td>{{ p.tEspera }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Tiempo de Retorno de la Tanda -->
+    <br>
+    <p style="font-weight: bold;">
+        Tiempo de Retorno de la Tanda: <span style="font-weight: normal;">{{ resultados[3] }}</span>
+    </p>  
+
+    <!-- Tiempo de Medio de Retorno de la Tanda -->
+    <br>
+    <p style="font-weight: bold;">
+        Tiempo de Medio de Retorno de la Tanda: <span style="font-weight: normal;">{{ resultados[4] }}</span>
+    </p> 
+
+    <!-- Tiempo de Cpu desocupada -->
+    <br>
+    <p style="font-weight: bold;">
+        Tiempo de CPU desocupada: <span style="font-weight: normal;">{{ resultados[5] }}</span>
+    </p> 
+
+    <!-- Tiempo de uso de So -->
+    <br>
+    <p style="font-weight: bold;">
+        Tiempo de uso de SO: <span style="font-weight: normal;">{{ resultados[6] }}</span>
+    </p>
+
+    <!-- Tiempos absolutos -->
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Tiempos de Uso de CPU Absolutos</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let p of resultados[7]">
+                <th>P({{ p.Pid }})</th>
+                <td>{{ p.tAbsoluto }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Tiempos porcentuales -->
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Tiempos de Uso de CPU Porcentuales</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let p of resultados[8]">
+                <th>P({{ p.Pid }})</th>
+                <td>{{ p.tPorcentual }}%</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

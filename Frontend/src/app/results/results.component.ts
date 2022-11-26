@@ -9,7 +9,8 @@ import { ProcesosService } from '../services/procesos.service';
 
 export class ResultsComponent implements OnInit {
   
-  items: any = [];
+  eventos: any = [];
+  resultados: any = [];
 
   constructor(private _servicio:ProcesosService) { }
 
@@ -21,12 +22,12 @@ export class ResultsComponent implements OnInit {
     // Acá debería ir el Post, no los get
     this._servicio.getEventos().subscribe(data => {
       console.log(data);
-      this.items = data;
+      this.eventos = data;
     }); 
 
     this._servicio.getResultados().subscribe(data => {
       console.log(data);
-      this.items = data;
+      this.resultados = data;
     }); 
   }
 

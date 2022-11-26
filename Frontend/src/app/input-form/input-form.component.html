@@ -1,4 +1,4 @@
-<div class="container-fluid d-flex align-items-center justify-content-center">
+<!-- <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="row">
         
         <div class="card p-3 mb-2 bg-dark text-white">
@@ -7,18 +7,18 @@
                 <h2>Planificador de Procesos</h2>
             </div>
 
-            <div class="card-body mt-3">
-                
-                <!-- Ver angular forms -->
-                <form action="/upload" enctype="multipart/form-data" method="post" id="inputForm">
-                    <!-- Input Archivo -->
-                    <div class="row p-2">
+            <div class="card-body mt-3"> -->
+
+<!-- Ver angular forms -->
+<!-- <form action="/upload" enctype="multipart/form-data" method="post" id="inputForm"> -->
+<!-- Input Archivo -->
+<!-- <div class="row p-2">
                         <label>Archivo </label>
                         <input type="file" class="form-control" name="archivo"/>
-                    </div>
-                    
-                    <!-- Input Drop-Down-List -->
-                    <div class="row p-2">
+                    </div> -->
+
+<!-- Input Drop-Down-List -->
+<!-- <div class="row p-2">
                         <label>Planificación </label>
                         <select class="form-select" name="planificacion">
                             <option selected>Seleccione un tipo de planificación...</option>
@@ -28,10 +28,10 @@
                             <option value="spn">Shortest Process Next</option>
                             <option value="srt">Shortest Remaining Time</option>
                         </select>    
-                    </div>
-                    
-                    <!-- Botón Enviar -->
-                    <div class="row mt-4 w-50 justify-content-center" style="
+                    </div> -->
+
+<!-- Botón Enviar -->
+<!-- <div class="row mt-4 w-50 justify-content-center" style="
                     margin-left: 100px;">
                         <input type="submit" class="btn btn-secondary" routerlink="/resultados" value="Enviar"/>
                     </div>
@@ -41,4 +41,73 @@
         </div>  
         
     </div>
+</div> -->
+
+<div class="container-fluid d-flex align-items-center justify-content-center">
+    <div class="row justify-content-center">
+        <div class="card w-50 p-3 mb-2 bg-dark text-white">
+            <div class="card-header">
+                <h2>Planificador de Procesos</h2>
+            </div>
+            <div class="card-body mt-3">
+                <form [formGroup]="form" (ngSubmit)="sendFile()"> <!-- form es la variable declarada en el typescript -->
+                    <p>
+                        Tipo Planificación: <br>
+                        <select id="select" class="form-select" formControlName="planificacion" (change)="getTarget('planificacion')">
+                            <option value="fcfs">First Come First Serve</option>
+                            <option value="pe">Prioridad Exerna</option>
+                            <option value="rr">Round Robin</option>
+                            <option value="spn">Shortest Process Next</option>
+                            <option value="srt">Shortest Remaining Time</option>
+                        </select>
+                    </p>
+                    <div class="row">
+                        <div class="col-3">
+                            <p>
+                                TIP: <br>
+                                <input type="text" class="form-control h-50" formControlName="tip" (change)="getTarget('tip')">
+                            </p>
+                        </div>
+                        <div class="col-3">
+                            <p>
+                                TCP: <br>
+                                <input type="text" class="form-control h-50" formControlName="tcp" (change)="getTarget('tcp')">
+                            </p>
+                        </div>
+                        <div class="col-3">
+                            <p>
+                                TFP: <br>
+                                <input type="text" class="form-control h-50" formControlName="tfp" (change)="getTarget('tfp')">
+                            </p>
+                        </div>
+                        <div class="col-3">
+                            <p>
+                                Quantum: <br>
+                                <input id="quantum" type="text" class="form-control h-50" formControlName="quantum" (change)="getTarget('quantum')">
+                            </p>
+                        </div>
+                    </div>
+                    <p>
+                        Archivo: <br>
+                        <input type="file" class="form-control" formControlName="archivo"
+                        (change)="getFile($event)">
+                    </p>
+                    <p>
+                        <br>
+                        <!-- <button type="submit" class="btn btn-secondary" [disabled]="form.invalid">Enviar</button> -->
+                        <button type="submit" class="btn btn-secondary" [disabled]="form.invalid">Enviar</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    $('#select').on('change', () => {
+        var selectValor = $(this).val();
+        if (selectValor == 'rr') $('#quantum').show();
+        else $('#quantum').hide();
+    });
+</script> -->

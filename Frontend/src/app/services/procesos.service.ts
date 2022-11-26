@@ -21,7 +21,10 @@ export class ProcesosService {
     return this.servicio.get(this._url+'resultados');
   }
 
-  postInputForm(): void {
-    this.servicio.post(this._url+'cargas');
+  postInputForm(body: FormData): void {
+    // console.log('Entró a hacer el POST');
+
+    // this.servicio.post(this._url+'cargas', body);
+    this.servicio.post<any>(this._url+'cargas', body).subscribe(data => console.log({data}));
   }
 }
