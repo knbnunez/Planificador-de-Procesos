@@ -1,14 +1,5 @@
-<!-- <div class="container">
-    <div class="row">
-        <ul class="list-group">
-            
-            <li class="list-group-item" *ngFor="let e of eventos">{{ e }}</li>
-        </ul>
-    </div>
-</div> -->
-
-<div class="container">
-    <table class="table">
+<div class="container-fluid align-items-center justify-content-center">
+    <table class="table table-bordered table-dark align-items-center justify-content-center">
         <thead>
             <tr>
                 <th scope="col">Tiempo</th>
@@ -28,11 +19,11 @@
     
     <!-- Tiempo retorno -->
     <br>
-    <table class="table">
+    <table class="table table-bordered table-dark">
         <thead>
             <tr>
                 <th scope="col">Tiempo de Retorno para cada Proceso</th>
-                <th></th>
+                <th>Tiempo</th>
             </tr>
         </thead>
         <tbody>
@@ -45,11 +36,11 @@
 
     <!-- Tiempo Normalizado -->
     <br>
-    <table class="table">
+    <table class="table table-bordered table-dark">
         <thead>
             <tr>
                 <th scope="col">Tiempo de Retorno Normalizado para cada Proceso</th>
-                <th></th>
+                <th>Tiempo</th>
             </tr>
         </thead>
         <tbody>
@@ -62,11 +53,11 @@
 
     <!-- Tiempo en estado de listos -->
     <br>
-    <table class="table">
+    <table class="table table-bordered table-dark">
         <thead>
             <tr>
                 <th scope="col">Tiempo en Estado de Listos</th>
-                <th></th>
+                <th>Tiempo</th>
             </tr>
         </thead>
         <tbody>
@@ -77,37 +68,57 @@
         </tbody>
     </table>
 
-    <!-- Tiempo de Retorno de la Tanda -->
-    <br>
-    <p style="font-weight: bold;">
-        Tiempo de Retorno de la Tanda: <span style="font-weight: normal;">{{ resultados[3] }}</span>
-    </p>  
-
-    <!-- Tiempo de Medio de Retorno de la Tanda -->
-    <br>
-    <p style="font-weight: bold;">
-        Tiempo de Medio de Retorno de la Tanda: <span style="font-weight: normal;">{{ resultados[4] }}</span>
-    </p> 
-
-    <!-- Tiempo de Cpu desocupada -->
-    <br>
-    <p style="font-weight: bold;">
-        Tiempo de CPU desocupada: <span style="font-weight: normal;">{{ resultados[5] }}</span>
-    </p> 
-
-    <!-- Tiempo de uso de So -->
-    <br>
-    <p style="font-weight: bold;">
-        Tiempo de uso de SO: <span style="font-weight: normal;">{{ resultados[6] }}</span>
-    </p>
+    <!-- Reformulación -->
+    <table class="table table-bordered table-dark">
+        <thead>
+            <tr>
+                <th>Para la Tanda</th>
+                <th>Values</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    Tiempo de Retorno
+                </td>
+                <td>
+                    {{ resultados[3] }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Tiempo Medio de Retorno
+                </td>
+                <td>
+                    {{ resultados[4] }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Tiempo de CPU desocupada
+                </td>
+                <td>
+                    {{ resultados[5] }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Tiempo de uso de SO 
+                </td>
+                <td>
+                    {{ resultados[6] }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <!-- Tiempos absolutos -->
-    <br>
-    <table class="table">
+    
+    <table class="table table-bordered table-dark">
         <thead>
             <tr>
                 <th scope="col">Tiempos de Uso de CPU Absolutos</th>
-                <th></th>
+                <th>Tiempo</th>
             </tr>
         </thead>
         <tbody>
@@ -120,11 +131,11 @@
 
     <!-- Tiempos porcentuales -->
     <br>
-    <table class="table">
+    <table class="table table-bordered table-dark">
         <thead>
             <tr>
                 <th scope="col">Tiempos de Uso de CPU Porcentuales</th>
-                <th></th>
+                <th>Tiempo</th>
             </tr>
         </thead>
         <tbody>
