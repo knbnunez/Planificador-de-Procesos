@@ -14,9 +14,9 @@
 
 
 // Error que no llegué a solucionar: 
-// por cada ejecución que se quiera hacer,
-// debemos reiniciar el servidor del backend,
-// sino queda con residuos pegados y no actualiza la ejecución con los datos nuevos...
+por cada ejecución que se quiera hacer,
+debemos reiniciar el servidor del backend,
+sino queda con residuos pegados y no actualiza la ejecución con los datos nuevos...
 
 
 // Para reinciar el servidor
