@@ -4,7 +4,7 @@ Para levantar el servidor del backend:
 1. Posicionarse en la carpeta Backend
 
 
-<!-- Instalamos los paquetes necesarios -->
+Instalamos los paquetes necesarios
 2.  npm install 
 
 
