@@ -341,10 +341,12 @@ function ejecutarRafaga() {
     if (colaCorriendo[0].tComputoParcialCpu == 0) evento.push('P('+colaCorriendo[0].id+') Comenzó a ejecutar ráfaga de CPU');
 
     if (tipoPlanificacion != 'rr') {
+        evento.push('P('+colaCorriendo[0].id+') Ejecutando ráfaga de CPU');
         colaCorriendo[0].tComputoParcialCpu += 1;
         tUsoCpu += 1;
     //
     } else { // Se está ejecutando el tipo de planificación: round robin
+        evento.push('P('+colaCorriendo[0].id+') Ejecutando ráfaga de CPU');
         colaCorriendo[0].tComputoParcialCpu += 1;
         colaCorriendo[0].tComputoQuantum += 1;
         tUsoCpu += 1;
@@ -461,8 +463,6 @@ function main() {
         colaNuevos
     });
 
-    // evento = [];
-    // colaNuevos.forEach(p => evento.push('P('+p.id+') Ingresó a Cola de Nuevos'));
     while (colaTerminados.length < cantProcesos) {
         evento = [];
         let movidos = moverProcesosAColaListos();
@@ -556,7 +556,9 @@ function getResultados() {
 function tratarInputs(tipoPlanificacionInput, tipInput, tcpInput, tfpInput, quantumInput, archivo) {
     const guardadoEn = archivo.filepath;
 	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
+    // console.log({contenidoDelArchivo});
     const contenidoDelArchivoString = contenidoDelArchivo.toString()
+    console.log({contenidoDelArchivoString});
     var listaProcesos = eval('(' + contenidoDelArchivoString + ')'); 
     
     listaProcesos.forEach(p => {

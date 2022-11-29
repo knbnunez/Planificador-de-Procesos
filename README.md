@@ -1,3 +1,11 @@
+- Instalar Node y npm, versiones:
+
+- Node: v18.12.0
+
+- npm: 9.19.2
+
+
+
 - Para levantar el servidor del backend:
 
 1. Posicionarse en la carpeta Backend

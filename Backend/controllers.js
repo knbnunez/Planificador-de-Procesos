@@ -23,9 +23,17 @@ router.post('/cargas', (request, response, next) => {
           return;
         }
         //
+        console.log({
+            planificacion: fields.planificacion,
+            tip: fields.tip, 
+            tcp : fields.tcp, 
+            tfp: fields.tfp, 
+            quantum: fields.quantum,  
+            archivo: files.archivo
+        });
         if (files.archivo) services.tratarInputs(
             fields.planificacion,
-            fields.tip, // Falta agregar estos campos en el formulario del Front
+            fields.tip, // 
             fields.tcp, // ...
             fields.tfp, // ...
             fields.quantum,  // ...
