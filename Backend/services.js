@@ -3,7 +3,8 @@ const fs = require('fs');
 const Proceso = require('./models');
 
 // Para modularizar en el futuro
-const planificaciones = require('./prueba');
+// const planificaciones = require('./prueba');
+// No ocurrió por tiempo
 
 
 
@@ -472,10 +473,7 @@ function main() {
     }
     console.log({eventos});
     
-    // Finalizando imprimo
-    // resultados();    
-
-    // Generación de archivo opcional
+    // Generación de archivo resultado opcional...
     // const resultado = {
     // Agregar los objetos/arrays que quiera enviar por archivo.txt
     // };

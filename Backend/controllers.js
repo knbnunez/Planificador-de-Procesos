@@ -33,10 +33,10 @@ router.post('/cargas', (request, response, next) => {
         });
         if (files.archivo) services.tratarInputs(
             fields.planificacion,
-            fields.tip, // 
-            fields.tcp, // ...
-            fields.tfp, // ...
-            fields.quantum,  // ...
+            fields.tip,  
+            fields.tcp, 
+            fields.tfp, 
+            fields.quantum, 
             files.archivo
         );
     });
