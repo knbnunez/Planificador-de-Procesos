@@ -9,3 +9,29 @@
 .col-6 {
     padding: 50px;
 }
+
+.btn-info {
+    font-weight: bold;
+    box-shadow: 1px 1px 1px rgb(0, 0, 0), 0 0 10px rgba(153, 153, 153, 0.45), 0 0 5px rgba(123, 123, 123, 0.541);
+    opacity: 0.9;
+}
+
+.btn-warning {
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 1px 1px 1px rgb(0, 0, 0), 0 0 10px rgba(255, 196, 0, 0.45), 0 0 5px rgba(255, 251, 0, 0.541);
+    opacity: 0.9;
+
+    margin: 10px;
+    position: relative;
+    /* top: 0%; */
+    left: 41%;
+}
+
+h3 {
+    font-weight: bold;
+}
+
+table {
+    box-shadow: 1px 1px 1px black;
+}

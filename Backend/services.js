@@ -26,9 +26,9 @@ let tCpuDesocupada = 0; // Ningún proceso en cpu o uso de SO
 let tUsoSo = 0;         // Computo de TIP, TCP y TFP
 let tUsoCpu = 0;        // Ejecución efectiva de cpu por los procesos
 //
-let quantum = 5;        // Lo ingresa el usuario
+let quantum = 0;        // Lo ingresa el usuario
 //
-let tipoPlanificacion = 'fcfs'; // Default
+let tipoPlanificacion = ''; // Default
 //
 let eventos = []; // Por cada instante de tiempo
 let evento = [];  // Dentro de un mismo instante de tiempo
@@ -429,7 +429,6 @@ function ejecutarTfp() {
 
 function desasignarCpu() {
     let procesoADesasignar = colaCorriendo.pop();
-    // colaBloqueados.push(procesoADesasignar);
     // console.log('Abandonando CPU... P'+procesoADesasignar.id);    
     evento.push('P('+procesoADesasignar.id+') Se le desasignó la CPU');
     return procesoADesasignar;
@@ -452,27 +451,33 @@ function terminarCiclo() {
 /* -------------------------------------------------------------------------------------------- */
 
 function main() {
+    console.log({
+        evento,
+        tipoPlanificacion,
+        tip,
+        tcp,
+        tfp,
+        quantum,
+        colaNuevos
+    });
+
+    // evento = [];
+    // colaNuevos.forEach(p => evento.push('P('+p.id+') Ingresó a Cola de Nuevos'));
     while (colaTerminados.length < cantProcesos) {
-        // console.log({tiempo});
         evento = [];
         let movidos = moverProcesosAColaListos();
         ejecutarPlanificacion(tipoPlanificacion, movidos);
         terminarCiclo();
         simulaciones(evento);
-        // console.log('-----------------------');
     }
     console.log({eventos});
     
     // Finalizando imprimo
     // resultados();    
 
-    // Generación de archivo
+    // Generación de archivo opcional
     // const resultado = {
-    //     colaNuevos,
-    //     colaListos,
-    //     colaCorriendo,
-    //     colaBloqueados,
-    //     colaTerminados
+    // Agregar los objetos/arrays que quiera enviar por archivo.txt
     // };
     // console.log({resultado});
     // const resultadoStr = JSON.stringify(resultado);
@@ -514,7 +519,7 @@ function getResultados() {
     let tRetorno = tiempo;
 
     let total = 0;
-    for (let i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno;
+    for (let i = 0; i < colaTerminados.length; i++) total += colaTerminados[i].tRetorno - colaTerminados[i].tEspera;
     
     let tMedioRetorno = (total / colaTerminados.length);
     
@@ -540,14 +545,15 @@ function getResultados() {
         tCpuDesocupada,       // .valor
         tUsoSo,               // .valor
         tAbsolutos,           // array
-        tPorcentuales         // array
+        tPorcentuales,        // array
+        tipoPlanificacion,    // .valor
     ];  
 }
 
 
 /* -------------------------------------------------------------------------------------------- */
 
-function tratarInputs(planificacion, tip, tcp, tfp, quantum, archivo) {
+function tratarInputs(tipoPlanificacionInput, tipInput, tcpInput, tfpInput, quantumInput, archivo) {
     const guardadoEn = archivo.filepath;
 	const contenidoDelArchivo = fs.readFileSync(guardadoEn);
     const contenidoDelArchivoString = contenidoDelArchivo.toString()
@@ -566,46 +572,38 @@ function tratarInputs(planificacion, tip, tcp, tfp, quantum, archivo) {
         evento.push('P('+p.id+') Ingresó a Cola de Nuevos');
         cantProcesos += 1;
     });
-
+    simulaciones(evento);
     console.log({
-        planificacion,
-        tip,
-        tcp,
-        tfp,
-        quantum
+        tipoPlanificacionInput,
+        tipInput,
+        tcpInput,
+        tfpInput,
+        quantumInput
     });
 
-    if (planificacion != undefined) this.tipoPlanificacion = planificacion;
-    if (tip != undefined) this.tip = tip;
-    if (tcp != undefined) this.tcp = tcp;
-    if (tfp != undefined) this.tfp = tfp;
-    if (quantum != undefined) this.quantum = quantum;
-    
-    
-    // planificaciones.func1('Hola');
-    // planificaciones.func2(colaNuevos);
-    // console.log(colaNuevos); // No lo modifica... es pasado por valor, no por referencia al objeto
+    tipoPlanificacion = 'fcfs';
+    tip = 0;
+    tcp = 0;
+    tfp = 0;
+    quantum = 5;
+
+    if (tipoPlanificacionInput != undefined) tipoPlanificacion = tipoPlanificacionInput;
+    if (tipInput != undefined) tip = tipInput;
+    if (tcpInput != undefined) tcp = tcpInput;
+    if (tfpInput != undefined) tfp = tfpInput;
+    if (quantumInput != undefined) quantum = quantumInput;
 
     // ¡¡¡A SOLUCIONAR!!!
     // Si no se reinicia el servidor, no cambia la política de planificación... No comprendo por qué...
     // https://es.stackoverflow.com/questions/41771/como-reiniciar-un-proceso-con-nodejs
-
     
     main();
     
     // Reseteo valores
     colaNuevos = [];
     cantProcesos = 0;
-    tipoPlanificacion = 'fcfs';
-    this.tip = 0;
-    this.tcp = 0;
-    this.tfp = 0;
-    this.quantum = 0;
+    
 }
-
-// module.exports = tratarInputs;
-// module.exports = getEventos;
-// module.exports = getResultados;
 
 module.exports = {
     tratarInputs: tratarInputs,

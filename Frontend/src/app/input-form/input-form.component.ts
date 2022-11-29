@@ -47,11 +47,6 @@ export class InputFormComponent implements OnInit{
     }
     this.body.append('archivo', this._fileTmp.fileRaw, this._fileTmp.fileName);
   }
-  
-  // getOption(value: any): void {
-  //   console.log(value);
-  //   this.body.append('planificacion', value);
-  // }
 
   getTarget(formControlName: string): void {
     // console.log(value);
@@ -67,8 +62,6 @@ export class InputFormComponent implements OnInit{
     });
 
     this._servicio.postInputForm(this.body);
-    // console.log('Fin del sendFile');
-    // console.log(this._servicio.getResultados().subscribe(data => console.log(data)));
     this._router.navigate(['/resultados']);
 
   }
